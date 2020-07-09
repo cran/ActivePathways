@@ -5,11 +5,11 @@ dat[is.na(dat)] <- 1
 background <- makeBackground(gmt)
 
 # filenames for cytoscape
-file.names <- paste0(tempdir(), "/", c("pathways.txt", "subgroups.txt", "pathways.gmt", "legend.pdf"))
+CStag = "CS_files"
 
-# Run activePathways quickly
-run_ap_short <- function(dat) ActivePathways(dat, gmt[1:3], cutoff=1, significant=1)
-# run_ap_short_contribution <- function(dat) ActivePathways(dat, gmt[1:3], cutoff=1, significant=1)
+# Run ActivePathways quickly
+run_ap_short <- function(dat) ActivePathways(dat[,1, drop = F], gmt[1:3], cutoff=1, significant=1)
+run_ap_short_contribution <- function(dat) ActivePathways(dat, gmt[1:3], cutoff=1, significant=1)
 
 # Data for testing enrichmentAnalysis
 ea.gmt <- gmt[1:4]

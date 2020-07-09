@@ -34,9 +34,9 @@ test_that("significant is valid", {
                  "length(significant) == 1 is not TRUE", fixed=TRUE)
     expect_error(ActivePathways(dat, gmt, significant='qwe'),
                  "is.numeric(significant) is not TRUE", fixed=TRUE)
-    expect_warning(ActivePathways(dat, gmt, significant=0, return.all=TRUE),
+    expect_warning(ActivePathways(dat, gmt, significant = 0),
                    "No significant terms were found")
-    expect_error(ActivePathways(dat, gmt, significant=1, return.all=TRUE), NA)
+    expect_error(ActivePathways(dat, gmt, significant = 1), NA)
 })
 
 
@@ -51,9 +51,9 @@ test_that("cutoff is valid", {
                  "length(cutoff) == 1 is not TRUE", fixed=TRUE)
     expect_error(ActivePathways(dat, gmt, cutoff='qwe'),
                  "is.numeric(cutoff) is not TRUE", fixed=TRUE)
-    expect_warning(ActivePathways(dat, gmt, cutoff=0, return.all=TRUE),
+    expect_error(ActivePathways(dat, gmt, cutoff=0),
                  "No genes made the cutoff", fixed=TRUE)
-    expect_error(ActivePathways(dat, gmt, cutoff=1, return.all=TRUE), NA)
+    expect_error(ActivePathways(dat, gmt, cutoff=1), NA)
 })
 
 

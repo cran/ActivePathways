@@ -1,47 +1,19 @@
-# activePathways 1.0.1
+# ActivePathways 1.0.2
 
 ## Major Changes
 
-* Rename to activePathways
-
-# activeDriverPW 1.0.0
-
-## Major Changes
-* Add a geneset.filter option to activeDriverPW to filter the GMT by geneset size
-* Add vignettes
-* Export merge_p_values method
-
-
-# activeDriverPW 0.0.0.9002
-
-## Major changes
-* Rename to activeDriverPW
-
-# mpea 0.0.0.9001
-
-## Major Changes
-* Change column contribution method. Column contribution is now reported as the
-log-fold-change when the column is excluded. ie, -log10(p_val_with_column / p_val_without_column)
-
-## Minor Changes
-* No longer raises an error if no significant terms are found and `return.all` 
-is false. Instead returns an empty `data.table` and issues a warning.
-* Issue a warning if genes are filtered out for not being found in the background
-* Change default p-value adjustment method to "holm"
-* If return.all==FALSE, calculates columnContribution only for terms that will
-returned. Speeds up runtime by roughly a factor of 2
-* Add "none" option to p-value adjustment methods
-* New implementation of orderedHypergeometric function which is several times faster.
-
-## Bug fixes
-* Fix Brown's method when all p-values in a column are the same
-* Fix in orderedHypergeometric which added an extra NA to the `complement`, leading
-to small errors in the calculated p-value
-* Fixed another bug in orderedHypergeometric which added an extra NA to the 
-`complement` in some cases, leading to small errors in the calculated p-value
-
-# mpea 0.0.0.9000
-
-* Initial Build
-
-* Added a `NEWS.md` file to track changes to the package.
+* Renamed package to ActivePathways from activePathways for consistency 
+with function and publication
+* Added new function export_as_CSV(res, file_name) to save data in 
+spreadsheet-friendly formats
+* Updated README-file with an actionable step-by-step tutorial
+* Changed logic of creating files for Enrichment Map: the user can provide 
+the parameter "cytoscape.file.tag" for creating the required files. If the 
+parameter is NA (default), no files are created. No directories are created. 
+* Removed the parameter "return.all" as it was redundant with the 
+parameter "significance".
+* Removed the parameter "reanalyze" to simplify the package and leave the structuring 
+of results up to the user.
+* Removed the dependency on the R package metap. As a result, only Fisher's and Brown's p-value 
+merging options are available.
+* Updated the vignette that now describes the ActivePathways package as well as the following steps of visualising results as enrichment maps in Cytoscape. 

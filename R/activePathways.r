@@ -1,120 +1,110 @@
-
 #' ActivePathways
 #'
 #' @param scores A numerical matrix of p-values where each row is a gene and
-#'   each column is a test. Rownames should be the genes and colnames the names
-#'   of the tests. All values must be 0<=p<=1 with missing values removed or
-#'   converted to 1
+#'   each column represents an omics dataset (evidence). Rownames correspond to the genes 
+#'   and colnames to the datasets. All values must be 0<=p<=1. We recommend converting 
+#'   missing values to ones. 
 #' @param gmt A GMT object to be used for enrichment analysis. If a filename, a
-#'   GMT object will be read from the file
+#'   GMT object will be read from the file.
 #' @param background A character vector of gene names to be used as a
 #'   statistical background. By default, the background is all genes that appear
-#'   in \code{gmt}
+#'   in \code{gmt}.
 #' @param geneset.filter A numeric vector of length two giving the lower and 
 #'   upper limits for the size of the annotated geneset to pathways in gmt.
 #'   Pathways with a geneset shorter than \code{geneset.filter[1]} or longer
 #'   than \code{geneset.filter[2]} will be removed. Set either value to NA to
 #'   to not enforce a minimum or maximum value, or set \code{geneset.filter} to 
-#'   \code{NULL} to skip filtering
-#' @param cutoff A maximum p-value for a gene to be used for enrichment analysis.
-#'   Any genes with \code{adjusted.p.val > significant} will be discarded before testing
-#' @param significant A number in [0,1] denoting the maximum p-value for a
-#'   pathway to be considered significantly enriched.
-#' @param merge.method Method to merge p-values. See section Merging p Values
-#' @param correction.method Method to correct p-values. See
-#'   \code{\link[stats]{p.adjust}} for details
-#' @param return.all Whether to return results for all terms or only significant
-#'   terms
-#' @param cytoscape.file.dir the directory to which the output files should be written, if unspecified,
-#'   files will be written to a directory called "ActivePathways.cytoscape.files". If directory does not exist, it will be automatically
-#'   created. If NULL, no output files will be written.
-#' @param reanalyze a boolean indicating whether the dataset will be reanalyzed with parameter or data changes.
-#' If TRUE, ActivePathways will write subdirectories in the format of Version1A, Version1B, etc to indicate sequential
-#' analyses. If FALSE, ActivePathways will write output files to the indicated directory. \code{reanalyze} will only
-#' be active if \code{cytoscape.file.dir} is not NULL.
+#'   \code{NULL} to skip filtering.
+#' @param cutoff A maximum merged p-value for a gene to be used for analysis.
+#'   Any genes with merged, unadjusted \code{p > significant} will be discarded 
+#'   before testing.
+#' @param significant Significance cutoff for selecting enriched pathways. Pathways with
+#'   \code{adjusted.p.val < significant} will be selected as results.
+#' @param merge.method Statistical method to merge p-values. See section on Merging P-Values
+#' @param correction.method Statistical method to correct p-values. See
+#'   \code{\link[stats]{p.adjust}} for details.
+#' @param cytoscape.file.tag The directory and/or file prefix to which the output files
+#'   for generating enrichment maps should be written. If NA, files will not be written. 
 #'
-#' @return A data.table of terms containing the following columns:
+#' @return A data.table of terms (enriched pathways) containing the following columns:
 #'   \describe{
-#'     \item{term.id}{The id of the term}
+#'     \item{term.id}{The database ID of the term}
 #'     \item{term.name}{The full name of the term}
 #'     \item{adjusted.p.val}{The associated p-value, adjusted for multiple testing}
 #'     \item{term.size}{The number of genes annotated to the term}
-#'     \item{overlap}{A character vector of the genes that overlap between the
-#'     term and the query}
-#'     \item{evidence}{Columns of \code{scores} that contributed individually to 
-#'          enrichment of the pathway. Each column is evaluated separately for 
-#'          enrichments and added to the evidence field if the pathway is found.}
+#'     \item{overlap}{A character vector of the genes enriched in the term}
+#'     \item{evidence}{Columns of \code{scores} (i.e., omics datasets) that contributed 
+#'          individually to the enrichment of the term. Each input column is evaluated 
+#'          separately for enrichments and added to the evidence if the term is found.}
 #'   }
-#'   If \code{return.all == FALSE} then only terms with
-#'     \code{adjusted.p.val <= significant} will be returned, otherwise all terms will be
-#'     returned.
 #'
-#' @section Merging p Values:
-#' In order to obtain a single score for each gene, the p-values in \code{scores}
-#' are merged row-wise. There are multiple methods available that can be used
-#' to obtain this merged score. The main methods are:
+#' @section Merging P-values:
+#' To obtain a single p-value for each gene across the multiple omics datasets considered, 
+#' the p-values in \code{scores} #' are merged row-wise using a data fusion approach of p-value merging. 
+#' The two available methods are:
 #' \describe{
-#'  \item{Fisher or sumlog}{Fisher's method assumes p-values are uniformly
+#'  \item{Fisher}{Fisher's method assumes p-values are uniformly
 #'  distributed and performs a chi-squared test on the statistic sum(-2 log(p)).
 #'  This method is most appropriate when the columns in \code{scores} are
 #'  independent.}
 #'  \item{Brown}{Brown's method extends Fisher's method by accounting for the
 #'  covariance in the columns of \code{scores}. It is more appropriate when the
 #'  tests of significance used to create the columns in \code{scores} are not
-#'  necessarily independent.}
+#'  necessarily independent. The Brown's method is therefore recommended for 
+#'  many omics integration approaches.}
 #' }
-#' Other methods are also available. See \code{\link[metap]{metap-package}}
-#' for more details
 #'
 #' @section Cytoscape:
-#'   ActivePathways will write four files that can be used to build a network using Cytoscape and the
-#'   EnrichmentMap and enhancedGraphics apps. The four files written are:
+#'   To visualize and interpret enriched pathways, ActivePathways provides an option
+#'   to further analyse results as enrichment maps in the Cytoscape software. 
+#'   If \code{!is.na(cytoscape.file.tag)}, four files will be written that can be used 
+#'   to build enrichment maps. This requires the EnrichmentMap and enhancedGraphics apps.
+#'
+#' The four files written are:
 #'   \describe{
 #'     \item{pathways.txt}{A list of significant terms and the
 #'     associated p-value. Only terms with \code{adjusted.p.val <= significant} are
-#'     written to this file}
-#'     \item{subgroups.txt}{A matrix indicating whether the significant
-#'     pathways are found to be significant when considering only one column from
-#'     \code{scores}. A 1 indicates that that term is significant using only that
-#'     column to test for enrichment analysis}
-#'     \item{pathways.gmt}{A Shortened version of the supplied gmt
-#'     file, containing only the terms in pathways.txt}
+#'     written to this file.}
+#'     \item{subgroups.txt}{A matrix indicating whether the significant terms (pathways)
+#'     were also found to be significant when considering only one column from
+#'     \code{scores}. A one indicates that that term was found to be significant 
+#' 			when only p-values in that column were used to select genes.}
+#'     \item{pathways.gmt}{A Shortened version of the supplied GMT
+#'     file, containing only the significantly enriched terms in pathways.txt. }
 #'     \item{legend.pdf}{A legend with colours matching contributions
-#'     from columns in \code{scores}}
+#'     from columns in \code{scores}.}
 #'   }
 #'
 #'   How to use: Create an enrichment map in Cytoscape with the file of terms
 #'   (pathways.txt) and the shortened gmt file
-#'   (pathways.gmt). Upload (File > import > table > file) the
-#'   subgroups file (subgroups.txt) as a table. Under the 'style'
+#'   (pathways.gmt). Upload the subgroups file (subgroups.txt) as a table
+#'   using the menu File > Import > Table from File. To paint nodes according 
+#'   to the type of supporting evidence, use the 'style'
 #'   panel, set image/Chart1 to use the column `instruct` and the passthrough
-#'   mapping type. Use (legend.pdf) as a reference in final figure.
+#'   mapping type. Make sure the app enhancedGraphics is installed. 
+#'   Lastly, use the file legend.pdf as a reference for colors in the enrichment map.
 #'
 #' @examples
-#' dat <- as.matrix(read.table(system.file('extdata', 
-#'                                         'Adenocarcinoma_scores_subset.tsv', 
-#'                                          package='ActivePathways'), 
-#'                  header=TRUE, 
-#'                  row.names='Gene'))
-#' dat[is.na(dat)] <- 1
-#' ActivePathways(dat, 
-#'                system.file('extdata', 'hsapiens_REAC_subset.gmt', package='ActivePathways'), 
-#'                return.all=TRUE, 
-#'                cytoscape.file.dir=NULL)
+#'     fname_scores <- system.file("extdata", "Adenocarcinoma_scores_subset.tsv", 
+#'          package = "ActivePathways")
+#'     fname_GMT = system.file("extdata", "hsapiens_REAC_subset.gmt",
+#'          package = "ActivePathways")
+#'
+#'     dat <- as.matrix(read.table(fname_scores, header = TRUE, row.names = 'Gene'))
+#'     dat[is.na(dat)] <- 1
+#'
+#'     ActivePathways(dat, fname_GMT)
 #'
 #' @import data.table
-#' @import metap
 #'
 #' @export
-ActivePathways <-  function(scores, gmt, background = NULL,
+
+ActivePathways <-  function(scores, gmt, background = makeBackground(gmt),
                             geneset.filter = c(5, 1000), cutoff = 0.1, significant = 0.05,
-                            merge.method = c("Brown", "Fisher", "logitp", "meanp", 
-                                             "sump", "sumz", "sumlog"),
+                            merge.method = c("Brown", "Fisher"),
                             correction.method = c("holm", "fdr", "hochberg", "hommel",
                                                   "bonferroni", "BH", "BY", "none"),
-                            return.all=FALSE, 
-                            cytoscape.file.dir = NULL,
-                            reanalyze = FALSE) {
+                            cytoscape.file.tag = NA) {
   
   merge.method <- match.arg(merge.method)
   correction.method <- match.arg(correction.method)
@@ -124,7 +114,7 @@ ActivePathways <-  function(scores, gmt, background = NULL,
   if (!(is.matrix(scores) && is.numeric(scores))) stop("scores must be a numeric matrix")
   if (any(is.na(scores))) stop("scores may not contain missing values")
   if (any(scores < 0) || any(scores > 1)) stop("All values in scores must be in [0,1]")
-  if (any(duplicated(rownames(scores)))) stop("scores contains duplicated genes. rownames must be unique")
+  if (any(duplicated(rownames(scores)))) stop("Scores matrix contains duplicated genes - rownames must be unique.")
   
   # cutoff and significant
   stopifnot(length(cutoff) == 1)
@@ -137,18 +127,9 @@ ActivePathways <-  function(scores, gmt, background = NULL,
   # gmt
   if (!is.GMT(gmt)) gmt <- read.GMT(gmt)
   if (length(gmt) == 0) stop("No pathways in gmt made the geneset.filter")
-  
-  # background
-  if (is.null(background)){
-    background = makeBackground(gmt)
-    message(paste("background gene set of ", length(background),  " genes derived from GMT file"))
-  } else {
-    if (!(is.character(background) && is.vector(background))) {
-      stop("background must be a character vector")
-    }
-    message(paste("background gene set of ", length(background),  " genes derived from user-defined list"))
-  }
-
+  if (!(is.character(background) && is.vector(background))) {
+    stop("background must be a character vector")
+  } 
   
   # geneset.filter
   if (!is.null(geneset.filter)) {
@@ -164,40 +145,10 @@ ActivePathways <-  function(scores, gmt, background = NULL,
   # contribution
   if (ncol(scores) == 1) {
     contribution <- FALSE
-    message("scores contains only one column. Column contributions will not be calculated")
+    message("Scores matrix contains only one column. Column contributions will not be calculated.")
   }
   
-  if(!is.null(cytoscape.file.dir)){
-    
-    # cytoscape.file.dir
-    if(!is.character(cytoscape.file.dir) | length(cytoscape.file.dir) != 1){
-      stop("cytoscape.file.dir must be a string")
-    }
-    if (!dir.exists(cytoscape.file.dir)){
-      dir.create(cytoscape.file.dir)
-      message(paste0("Creating ", cytoscape.file.dir))
-    }
-    if(!endsWith(cytoscape.file.dir, "[/]")){
-      cytoscape.file.dir = paste0(cytoscape.file.dir, "/")
-    }
-    
-    # Creating subdirectories
-    if(reanalyze){
-      subdir.order = expand.grid( LETTERS, 1:1000)
-      subdir.order = paste("Version", subdir.order[,2], subdir.order[,1], sep = "")
-      cytoscape.subdir = list.files(cytoscape.file.dir)
-      cytoscape.subdir = cytoscape.subdir[cytoscape.subdir %in% subdir.order]
-      if(length(cytoscape.subdir) == 0){
-        cytoscape.file.dir = paste0(cytoscape.file.dir, "Version1A/")
-      }else{
-        cytoscape.file.dir = paste0(cytoscape.file.dir, subdir.order[max(unlist(lapply(cytoscape.subdir, function(x) grep(x, subdir.order))))+1], "/")
-      }
-      dir.create(cytoscape.file.dir)
-      message(paste0("Creating ", cytoscape.file.dir))
-    }
-  }
-  
-  ##### filtering and sorting #####
+  ##### filtering and sorting ####
   
   # Filter the GMT
   if(!is.null(geneset.filter)) {
@@ -231,7 +182,7 @@ ActivePathways <-  function(scores, gmt, background = NULL,
   merged.scores <- merge_p_values(scores, merge.method)
   merged.scores <- merged.scores[merged.scores <= cutoff]
   
-  if (length(merged.scores) == 0) warning("No genes made the cutoff")
+  if (length(merged.scores) == 0) stop("No genes made the cutoff")
   
   # Sort genes by p-value
   ordered.scores <- names(merged.scores)[order(merged.scores)]
@@ -239,11 +190,13 @@ ActivePathways <-  function(scores, gmt, background = NULL,
   ##### enrichmentAnalysis and column contribution #####
   
   res <- enrichmentAnalysis(ordered.scores, gmt, background)
-  res[, "adjusted.p.val" := stats::p.adjust(res$adjusted.p.val, method=correction.method)]
-
+  adjusted_p <- stats::p.adjust(res$adjusted.p.val, method = correction.method)
+  res[, "adjusted.p.val" := adjusted_p]
+  
   significant.indeces <- which(res$adjusted.p.val <= significant)
   if (length(significant.indeces) == 0) {
-    warning("No significant terms were found")
+    warning("No significant terms were found.")
+    return()
   }
   
   if (contribution) {
@@ -254,23 +207,20 @@ ActivePathways <-  function(scores, gmt, background = NULL,
     sig.cols <- NULL
   }
   
-  if (!is.null(cytoscape.file.dir) && length(significant.indeces) > 0) {
-    # prepareCytoscape(res[significant.indeces, .(term.id, term.name, adjusted.p.val)],
-    #                  gmt[significant.indeces], 
-    #                  cytoscape.file.dir,
-    #                  sig.cols[significant.indeces,])
-    prepareCytoscape(res[significant.indeces, 1:3],
-                     gmt[significant.indeces],
-                     cytoscape.file.dir,
+  # if significant result were found and cytoscape file tag exists
+  # proceed with writing files in the working directory
+  if (length(significant.indeces) > 0 & !is.na(cytoscape.file.tag)) {
+    prepareCytoscape(res[significant.indeces, c("term.id", "term.name", "adjusted.p.val")],
+                     gmt[significant.indeces], 
+                     cytoscape.file.tag,
                      sig.cols[significant.indeces,])
   }
   
-  if(return.all) return(res)
   res[significant.indeces]
 }
 
 
-#' Perform Gene Set Enrichment Analysis on an ordered list of genes
+#' Perform pathway enrichment analysis on an ordered list of genes
 #'
 #' @param genelist character vector of gene names, in decreasing order
 #'   of significance
@@ -288,11 +238,6 @@ ActivePathways <-  function(scores, gmt, background = NULL,
 #'        term and the query}
 #'   }
 #' @keywords internal
-#'
-#' @examples
-#' \donttest{
-#'     enrichmentAnalysis(c('HERC2', 'SMC5', 'XPC', 'WRN'), gmt, makeBackground(gmt))
-#' }
 enrichmentAnalysis <- function(genelist, gmt, background) {
   dt <- data.table(term.id=names(gmt))
   
@@ -310,15 +255,16 @@ enrichmentAnalysis <- function(genelist, gmt, background) {
   dt
 }
 
-#' Determine which pathways are found to be significant using each column
-#' individually
+#' Determine which terms are found to be significant using each column
+#' individually. 
 #'
 #' @inheritParams ActivePathways
 #' @param pvals p-value for the pathways calculated by ActivePathways
 #'
 #' @return a data.table with columns 'term.id' and a column for each column
-#' in \code{scores}, indicating whether each pathway was found to be
-#' significant(TRUE) or not(FALSE) when considering only that column
+#' in \code{scores}, indicating whether each term (pathway) was found to be
+#' significant or not when considering only that column. For each term, 
+#' either report the list of related genes if that term was significant, or NA if not. 
 
 columnSignificance <- function(scores, gmt, background, cutoff, significant, correction.method, pvals) {
   dt <- data.table(term.id=names(gmt), evidence=NA)
@@ -328,8 +274,8 @@ columnSignificance <- function(scores, gmt, background, cutoff, significant, cor
     col.scores <- names(col.scores)[order(col.scores)]
     
     res <- enrichmentAnalysis(col.scores, gmt, background)
-    set(res, i=NULL, "adjusted.p.val", stats::p.adjust(res$adjusted.p.val, correction.method))
-    set(res, i=which(res$adjusted.p.val>significant), "overlap", list(list(NA)))
+    set(res, i = NULL, "adjusted.p.val", stats::p.adjust(res$adjusted.p.val, correction.method))
+    set(res, i = which(res$adjusted.p.val > significant), "overlap", list(list(NA)))
     set(dt, i=NULL, col, res$overlap)
   }
   
@@ -352,4 +298,27 @@ columnSignificance <- function(scores, gmt, background, cutoff, significant, cor
   
   dt
 }
+
+#' Export the results from ActivePathways as a comma-separated values (CSV) file. 
+#'
+#' @param res the data.table object with ActivePathways results.
+#' @param file_name location and name of the CSV file to write to.
+#' @export
+#'
+#' @examples
+#'     fname_scores <- system.file("extdata", "Adenocarcinoma_scores_subset.tsv", 
+#'          package = "ActivePathways")
+#'     fname_GMT = system.file("extdata", "hsapiens_REAC_subset.gmt",
+#'          package = "ActivePathways")
+#'
+#'     dat <- as.matrix(read.table(fname_scores, header = TRUE, row.names = 'Gene'))
+#'     dat[is.na(dat)] <- 1
+#'
+#'     res <- ActivePathways(dat, fname_GMT)
+#'\donttest{
+#'     export_as_CSV(res, "results_ActivePathways.csv")
+#'}
+export_as_CSV = function (res, file_name) {
+	data.table::fwrite(res, file_name)	
+} 
 
