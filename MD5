@@ -1,4 +1,4 @@
-7e822b296b0349dc4d609e49baf2718c *DESCRIPTION
+a19a2cf5be94e952490149e7dfe26b50 *DESCRIPTION
 4ae0cc09cc2b771013fa036fb4749f2f *NAMESPACE
 521f01ffdc8589bafd6f48956f7768b0 *NEWS.md
 a5110e06c19f1eac52d2bd1f5f47da78 *R/ActivePathways.r
@@ -6,10 +6,10 @@ a5110e06c19f1eac52d2bd1f5f47da78 *R/ActivePathways.r
 70ee87b9e5b2280ee89f1313131ad6c9 *R/gmt.r
 2458133494a4840824834477ee231280 *R/merge_p.r
 45549e071c9568961d13f3edef7700e5 *R/statistical_tests.r
-3df6e63ffd45848f048a1fd46201b2d0 *build/vignette.rds
+4ba1c810060edb7569a79b73e97ace71 *build/vignette.rds
 386817299ed969720f4ec493db5da7a3 *inst/doc/ActivePathways-vignette.R
-6d535d5d369c40aefe449f805f6ff15b *inst/doc/ActivePathways-vignette.Rmd
-844c190bc60503103c48c321e9dfe452 *inst/doc/ActivePathways-vignette.html
+297a6dbd36cf06cac268efb02da585c3 *inst/doc/ActivePathways-vignette.Rmd
+c65fe7f0ed41e3e987df53a058a6fbb6 *inst/doc/ActivePathways-vignette.html
 05f6bd331cd13e227ed5efacc2698eef *inst/extdata/Adenocarcinoma_scores_subset.tsv
 b60ae895b601e8799a13043f7907782d *inst/extdata/enrichmentMap__legend.pdf
 19433d2f775ee5e4f571227cc55c55d2 *inst/extdata/enrichmentMap__pathways.gmt
@@ -36,11 +36,11 @@ cca94bc7014380e6b469e84f38a9580d *tests/testthat/test_cytoscape.r
 9446861f4756a8e86e805bbf4c931944 *tests/testthat/test_data.txt
 0844864631a588101793ab585ff8d081 *tests/testthat/test_enrichmentAnalysis.r
 7088c82e3e4e65e9f91bd20adf902fa3 *tests/testthat/test_export_CSV.r
-c1371f222d7a48df5fa0fc7ab094a822 *tests/testthat/test_merge_p_values.r
+bb4a8966933c92ace1e8b831afeb6748 *tests/testthat/test_merge_p_values.r
 dabe68f42d189e9df93161ebe1d2e593 *tests/testthat/test_orderedHypergeometric.r
 2f3449f3de5d7b62fc492069517fff41 *tests/testthat/test_return.r
 c34d5fd00212ae4bc73100067c5c031f *tests/testthat/test_validation.r
-6d535d5d369c40aefe449f805f6ff15b *vignettes/ActivePathways-vignette.Rmd
+297a6dbd36cf06cac268efb02da585c3 *vignettes/ActivePathways-vignette.Rmd
 07bf93b3de8c3ef6436ff7038b4ccc10 *vignettes/CreateEnrichmentMapDialogue_V2.png
 078da9a9d3855a0573c19684620d6486 *vignettes/ImportStep_V2.png
 1ea4822a5aa6b0091d4f484001235e11 *vignettes/LegendView.png
