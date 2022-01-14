@@ -24,6 +24,10 @@
 #' @param col.significance A data.table object with a column 'term.id' and a column
 #' for each type of omics evidence indicating whether a term was also found to be signficiant or not
 #' when considering only the genes and p-values in the corresponding column of the \code{scores} matrix. If term was not found, NA's are shown in columns, otherwise the relevant lists of genes are shown.
+#' @param color_palette Color palette from RColorBrewer::brewer.pal to color each
+#' column in the scores matrix. If NULL grDevices::rainbow is used by default.
+#' @param custom_colors A character vector of custom colors for each column in the scores matrix.
+#' @param color_integrated_only A character vector of length 1 specifying the color of the "combined" pathway contribution. 
 #' @import ggplot2
 #'
 #' @return None
@@ -31,9 +35,12 @@
 prepareCytoscape <- function(terms, 
                              gmt, 
                              cytoscape.file.tag, 
-                             col.significance) {
+                             col.significance, color_palette = NULL, custom_colors = NULL, color_integrated_only = "#FFFFF0") {
   if (!is.null(col.significance)) {
-    tests <- unique(unlist(col.significance$evidence))
+    tests <- colnames(col.significance)[3:length(colnames(col.significance))]
+    tests <- substr(tests, 7, 100)
+    tests <- append(tests, "combined")
+    
     rows <- 1:nrow(col.significance)
     
     evidence.columns = do.call(rbind, lapply(col.significance$evidence,
@@ -42,8 +49,16 @@ prepareCytoscape <- function(terms,
     
     col.significance = cbind(col.significance[,"term.id"], evidence.columns)
     
-    # Use pichart
-    col.colors <- grDevices::rainbow(length(tests))
+    if(is.null(color_palette) & is.null(custom_colors)) {
+      col.colors <- grDevices::rainbow(length(tests))
+    } else if (!is.null(custom_colors)){
+      custom_colors <- append(custom_colors, color_integrated_only, after = match("combined",tests))
+      col.colors <- custom_colors
+    } else {
+      col.colors <- RColorBrewer::brewer.pal(length(tests),color_palette)
+    }
+    col.colors <- replace(col.colors, match("combined",tests),color_integrated_only)
+                                             
     instruct.str <- paste('piechart:',
                           ' attributelist="', 
                           paste(tests, collapse=','),
@@ -102,6 +117,3 @@ prepareCytoscape <- function(terms,
               paste0(cytoscape.file.tag, "pathways.gmt"))
   }
 }
-
-
-

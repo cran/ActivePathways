@@ -14,7 +14,10 @@ ActivePathways(
   merge.method = c("Brown", "Fisher"),
   correction.method = c("holm", "fdr", "hochberg", "hommel", "bonferroni", "BH", "BY",
     "none"),
-  cytoscape.file.tag = NA
+  cytoscape.file.tag = NA,
+  color_palette = NULL,
+  custom_colors = NULL,
+  color_integrated_only = "#FFFFF0"
 )
 }
 \arguments{
@@ -51,6 +54,14 @@ before testing.}
 
 \item{cytoscape.file.tag}{The directory and/or file prefix to which the output files
 for generating enrichment maps should be written. If NA, files will not be written.}
+
+\item{color_palette}{Color palette from RColorBrewer::brewer.pal to color each
+column in the scores matrix. If NULL grDevices::rainbow is used by default.}
+
+\item{custom_colors}{A character vector of custom colors for each column in the scores matrix.}
+
+\item{color_integrated_only}{A character vector of length 1 specifying the color of the 
+"combined" pathway contribution.}
 }
 \value{
 A data.table of terms (enriched pathways) containing the following columns:

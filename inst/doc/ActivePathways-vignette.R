@@ -123,3 +123,9 @@ cat(paste(readLines(files[1])[1:5], collapse='\n'))
 cat(paste(readLines(files[2])[1:5], collapse='\n'))
 cat(paste(readLines(files[3])[18:19], collapse='\n'))
 
+## -----------------------------------------------------------------------------
+res <- ActivePathways(scores, gmt.file, cytoscape.file.tag = "enrichmentMap__", color_palette = "Pastel1")
+
+## -----------------------------------------------------------------------------
+res <- ActivePathways(scores, gmt.file, cytoscape.file.tag = "enrichmentMap__", custom_colors = c("violet","green","orange","red"))
+

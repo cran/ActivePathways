@@ -4,7 +4,15 @@
 \alias{prepareCytoscape}
 \title{Prepare files for building an enrichment map network visualization in Cytoscape}
 \usage{
-prepareCytoscape(terms, gmt, cytoscape.file.tag, col.significance)
+prepareCytoscape(
+  terms,
+  gmt,
+  cytoscape.file.tag,
+  col.significance,
+  color_palette = NULL,
+  custom_colors = NULL,
+  color_integrated_only = "#FFFFF0"
+)
 }
 \arguments{
 \item{terms}{A data.table object with the columns 'term.id', 'term.name', 'adjusted.p.val'.}
@@ -17,6 +25,13 @@ found to be significant in the ActivePathways analysis.}
 \item{col.significance}{A data.table object with a column 'term.id' and a column
 for each type of omics evidence indicating whether a term was also found to be signficiant or not
 when considering only the genes and p-values in the corresponding column of the \code{scores} matrix. If term was not found, NA's are shown in columns, otherwise the relevant lists of genes are shown.}
+
+\item{color_palette}{Color palette from RColorBrewer::brewer.pal to color each
+column in the scores matrix. If NULL grDevices::rainbow is used by default.}
+
+\item{custom_colors}{A character vector of custom colors for each column in the scores matrix.}
+
+\item{color_integrated_only}{A character vector of length 1 specifying the color of the "combined" pathway contribution.}
 }
 \value{
 None
