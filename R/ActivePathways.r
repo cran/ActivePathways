@@ -176,8 +176,26 @@ ActivePathways <-  function(scores, gmt, background = makeBackground(gmt),
   }
   
   ##### filtering and sorting ####
-  
+    
+  # Remove any genes not found in the background
+  orig.length <- nrow(scores)
+  scores <- scores[rownames(scores) %in% background, , drop=FALSE]
+  if (nrow(scores) == 0) {
+    stop("scores does not contain any genes in the background")
+  }
+  if (nrow(scores) < orig.length) {
+    message(paste(orig.length - nrow(scores), "rows were removed from scores",
+                  "because they are not found in the background"))
+  }
+	
   # Filter the GMT
+  background_genes <- lapply(sapply(gmt, "[", c(3)), intersect, background)
+  background_genes <- background_genes[lapply(background_genes,length) > 0]
+  gmt <- gmt[names(sapply(gmt,"[",c(3))) %in% names(background_genes)]
+  for (i in 1:length(gmt)) {
+    gmt[[i]]$genes <- background_genes[[i]]
+  }
+	
   if(!is.null(geneset.filter)) {
     orig.length <- length(gmt)
     if (!is.na(geneset.filter[1])) {
@@ -191,17 +209,6 @@ ActivePathways <-  function(scores, gmt, background = makeBackground(gmt),
       message(paste(orig.length - length(gmt), "terms were removed from gmt", 
                     "because they did not make the geneset.filter"))
     }
-  }
-  
-  # Remove any genes not found in the background
-  orig.length <- nrow(scores)
-  scores <- scores[rownames(scores) %in% background, , drop=FALSE]
-  if (nrow(scores) == 0) {
-    stop("scores does not contain any genes in the background")
-  }
-  if (nrow(scores) < orig.length) {
-    message(paste(orig.length - nrow(scores), "rows were removed from scores",
-                  "because they are not found in the background"))
   }
   
   # merge p-values to get a single score for each gene and remove any genes
@@ -273,7 +280,7 @@ enrichmentAnalysis <- function(genelist, gmt, background) {
     tmp <- orderedHypergeometric(genelist, background, term$genes)
     overlap <- genelist[1:tmp$ind]
     overlap <- overlap[overlap %in% term$genes]
-    if (length(overlap) == 0) overlap <- NA
+    if (length(overlap) == 0) overlap <- c()
     set(dt, i, 'term.name', term$name)
     set(dt, i, 'adjusted.p.val', tmp$p.val)
     set(dt, i, 'term.size', length(term$genes))

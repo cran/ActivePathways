@@ -1,7 +1,7 @@
-ef9ab0c90c136bbcbe709288716e5522 *DESCRIPTION
+d297ee2477c717c3bac225ef94c01922 *DESCRIPTION
 4ae0cc09cc2b771013fa036fb4749f2f *NAMESPACE
-c55113565442128dc975d78fc0b10fc7 *NEWS.md
-116b05400f345e32cd7d75769b06a2e1 *R/ActivePathways.r
+907bcf2ca93e79ab54d959b208b108e8 *NEWS.md
+2e0f792aa9cb14cc39fdeefe1eebd9ee *R/ActivePathways.r
 fda4d7d10163d9019fbfa7923ec3aa88 *R/cytoscape.r
 70ee87b9e5b2280ee89f1313131ad6c9 *R/gmt.r
 2458133494a4840824834477ee231280 *R/merge_p.r
@@ -9,7 +9,7 @@ fda4d7d10163d9019fbfa7923ec3aa88 *R/cytoscape.r
 4ba1c810060edb7569a79b73e97ace71 *build/vignette.rds
 58f040e8521e915fe2d05a025a4d5f4e *inst/doc/ActivePathways-vignette.R
 2cccdd8e509c3e3aee190da3f76cd014 *inst/doc/ActivePathways-vignette.Rmd
-e76d4d436e9254cc3a89385e49484451 *inst/doc/ActivePathways-vignette.html
+c2271475e303b66b4e109a1809553abb *inst/doc/ActivePathways-vignette.html
 05f6bd331cd13e227ed5efacc2698eef *inst/extdata/Adenocarcinoma_scores_subset.tsv
 b60ae895b601e8799a13043f7907782d *inst/extdata/enrichmentMap__legend.pdf
 19433d2f775ee5e4f571227cc55c55d2 *inst/extdata/enrichmentMap__pathways.gmt
@@ -34,7 +34,7 @@ c425aad548b4cf283a2c7a2ced83596b *tests/testthat/helper.r
 c14c9bd0e4d68e357b56081722c8b209 *tests/testthat/test_columnSignificance.r
 cca94bc7014380e6b469e84f38a9580d *tests/testthat/test_cytoscape.r
 9446861f4756a8e86e805bbf4c931944 *tests/testthat/test_data.txt
-0844864631a588101793ab585ff8d081 *tests/testthat/test_enrichmentAnalysis.r
+762f379c95f8c7618ed6834eb0bca92a *tests/testthat/test_enrichmentAnalysis.r
 7088c82e3e4e65e9f91bd20adf902fa3 *tests/testthat/test_export_CSV.r
 bb4a8966933c92ace1e8b831afeb6748 *tests/testthat/test_merge_p_values.r
 dabe68f42d189e9df93161ebe1d2e593 *tests/testthat/test_orderedHypergeometric.r

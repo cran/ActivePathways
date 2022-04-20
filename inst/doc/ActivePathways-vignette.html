@@ -12,7 +12,7 @@
 
 <meta name="author" content="Juri Reimand, Jonathan Barenboim" />
 
-<meta name="date" content="2022-01-13" />
+<meta name="date" content="2022-04-19" />
 
 <title>Analysing and visualising pathway enrichment in multi-omics data using ActivePathways</title>
 
@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function(e) {
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -332,7 +333,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Analysing and visualising pathway enrichment in multi-omics data using ActivePathways</h1>
 <h4 class="author">Juri Reimand, Jonathan Barenboim</h4>
-<h4 class="date">2022-01-13</h4>
+<h4 class="date">2022-04-19</h4>
 
 
 
@@ -482,22 +483,26 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true"></a>background &lt;-<span class="st"> </span>background[background <span class="op">!=</span><span class="st"> &#39;TP53&#39;</span>]</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true"></a><span class="kw">ActivePathways</span>(scores, gmt.file, <span class="dt">background =</span> background)</span></code></pre></div>
 <pre><code>##          term.id                     term.name adjusted.p.val term.size
-##  1: REAC:2424491               DAP12 signaling    0.002258987       358
-##  2:  REAC:422475                 Axon guidance    0.009416431       555
-##  3:  REAC:177929             Signaling by EGFR    0.021767252       366
-##                                              overlap evidence
-##  1:               PIK3CA,KRAS,PTEN,BRAF,NRAS,B2M,...      CDS
-##  2:          PIK3CA,KRAS,BRAF,NRAS,CALM2,RPS6KA3,...    X3UTR
-##  3:             PIK3CA,KRAS,PTEN,BRAF,NRAS,CALM2,...      CDS
+##  1: REAC:2424491               DAP12 signaling   2.096408e-03       357
+##  2:  REAC:422475                 Axon guidance   8.689293e-03       527
+##  3:  REAC:177929             Signaling by EGFR   2.003969e-02       365
+##                                              overlap           evidence
+##  1:               PIK3CA,KRAS,PTEN,BRAF,NRAS,B2M,...                CDS
+##  2:          PIK3CA,KRAS,BRAF,NRAS,CALM2,RPS6KA3,...              X3UTR
+##  3:             PIK3CA,KRAS,PTEN,BRAF,NRAS,CALM2,...                CDS
 ##                              Genes_X3UTR Genes_X5UTR
 ##  1:                                   NA          NA
 ##  2: CALM2,ARPC2,RHOA,NUMB,CALM1,ACTB,...          NA
 ##  3:                                   NA          NA
-##                                   Genes_CDS Genes_promCore
-##  1:   PTEN,KRAS,PIK3CA,BRAF,NRAS,CDKN1A,...             NA
-##  2:                                      NA             NA
-##  3:   PTEN,KRAS,PIK3CA,BRAF,NRAS,CDKN1A,...             NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 13 rows ]</code></pre>
+##                                   Genes_CDS
+##  1:   PTEN,KRAS,PIK3CA,BRAF,NRAS,CDKN1A,...
+##  2:                                      NA
+##  3:   PTEN,KRAS,PIK3CA,BRAF,NRAS,CDKN1A,...
+##                                 Genes_promCore
+##  1:                                         NA
+##  2:                                         NA
+##  3:                                         NA
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 15 rows ]</code></pre>
 <p>Note that only the genes found in the background set are used for testing enrichment. Any genes in the input data that are not in the background set will be automatically removed by <code>ActivePathways</code>.</p>
 </div>
 <div id="merging-p-values" class="section level2">
