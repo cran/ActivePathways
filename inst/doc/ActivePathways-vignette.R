@@ -1,4 +1,4 @@
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 knitr::opts_chunk$set(warning=FALSE, 
                       message=FALSE, 
                       width=500)
@@ -62,7 +62,7 @@ constraints_vector
 
 ## -----------------------------------------------------------------------------
 directional_merged_pvals <- merge_p_values(pval_matrix, 
-		method = "Brown", dir_matrix, constraints_vector)
+		method = "DPM", dir_matrix, constraints_vector)
 
 merged_pvals <- merge_p_values(pval_matrix, method = "Brown")
 
@@ -123,7 +123,7 @@ constraints_vector
 dir_matrix[example_genes,]
 
 enriched_pathways_directional <- ActivePathways(
-		pval_matrix, gmt = fname_GMT2, cytoscape_file_tag = "Directional_",
+		pval_matrix, gmt = fname_GMT2, cytoscape_file_tag = "Directional_", merge_method = "DPM",
 		scores_direction = dir_matrix, constraints_vector = constraints_vector)
 
 ## -----------------------------------------------------------------------------
@@ -179,7 +179,7 @@ ActivePathways(scores, gmt)
 ## -----------------------------------------------------------------------------
 ActivePathways(scores, gmt_file, geneset_filter = c(10, 500))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  write.GMT(gmt, 'hsapiens_REAC_subset_filtered.gmt')
 
 ## -----------------------------------------------------------------------------
@@ -225,17 +225,17 @@ res$overlap[1:3]
 ## -----------------------------------------------------------------------------
 unlist(res[res$term_id == "REAC:422475","evidence"])
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  result_file <- paste('ActivePathways_results.csv', sep = '/')
 #  export_as_CSV (res, result_file) # remove comment to run
 #  read.csv(result_file, stringsAsFactors = F)[1:3,]
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  result_file <- paste('ActivePathways_results2.txt', sep = '/')
 #  data.table::fwrite(res, result_file, sep = '\t', sep2 = c('', ',', ''))
 #  cat(paste(readLines(result_file)[1:2], collapse = '\n'))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  res <- ActivePathways(scores, gmt_file, cytoscape_file_tag = "enrichmentMap__")
 
 ## -----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ files <- c(system.file('extdata', 'enrichmentMap__pathways.txt', package='Active
            system.file('extdata', 'enrichmentMap__pathways.gmt', package='ActivePathways'),
            system.file('extdata', 'enrichmentMap__legend.pdf', package='ActivePathways'))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  gmt_file <- system.file('extdata', 'hsapiens_REAC_subset.gmt', package = 'ActivePathways')
 #  scores_file <- system.file('extdata', 'Adenocarcinoma_scores_subset.tsv', package = 'ActivePathways')
 #  
