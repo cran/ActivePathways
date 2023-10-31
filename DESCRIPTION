@@ -1,7 +1,7 @@
 Package: ActivePathways
 Title: Integrative Pathway Enrichment Analysis of Multivariate Omics
         Data
-Version: 2.0.2
+Version: 2.0.3
 Authors@R: c(person("Juri", "Reimand", email = "juri.reimand@utoronto.ca", role = c("aut", "cre")),
            person("Jonathan", "Barenboim", email = "jon.barenboim@gmail.com", role = "ctb"),
            person("Mykhaylo", "Slobodyanyuk", email = "michael.slobodyanyuk@oicr.on.ca", role = "aut"))
@@ -16,10 +16,10 @@ RoxygenNote: 7.2.3
 Suggests: testthat, knitr, rmarkdown, RColorBrewer
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-10-02 04:25:03 UTC; jreimand
+Packaged: 2023-10-31 19:24:44 UTC; jreimand
 Author: Juri Reimand [aut, cre],
   Jonathan Barenboim [ctb],
   Mykhaylo Slobodyanyuk [aut]
 Maintainer: Juri Reimand <juri.reimand@utoronto.ca>
 Repository: CRAN
-Date/Publication: 2023-10-02 14:10:12 UTC
+Date/Publication: 2023-10-31 20:00:02 UTC

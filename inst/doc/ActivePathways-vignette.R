@@ -85,15 +85,16 @@ lineplot_df <- data.frame(original = -log10(merged_pvals),
 ggplot(lineplot_df) +
 	geom_point(size = 2.4, shape = 19,
 		aes(original, modified,
-		    color = ifelse(modified <= -log10(0.05), "#de2d26", "#2ca25f"))) +
+		    color = ifelse(original <= -log10(0.05),"gray",
+                                    ifelse(modified > -log10(0.05),"#1F449C","#F05039")))) +
 	labs(title = "",
 		 x ="Merged -log10(P)",
 		 y = "Directional Merged -log10(P)") + 
             geom_hline(yintercept = 1.301, linetype = "dashed",
-		       col = 'black', linewidth = 0.5) +
+		       col = 'black', size = 0.5) +
             geom_vline(xintercept = 1.301, linetype = "dashed",
-		       col = "black", linewidth = 0.5) + 
-            geom_abline(linewidth = 0.5, slope = 1,intercept = 0) +
+		       col = "black", size = 0.5) + 
+            geom_abline(size = 0.5, slope = 1,intercept = 0) +
 	    scale_color_identity()
 
 ## -----------------------------------------------------------------------------
