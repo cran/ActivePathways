@@ -12,7 +12,7 @@
 
 <meta name="author" content="Mykhaylo Slobodyanyuk, Jonathan Barenboim and Juri Reimand" />
 
-<meta name="date" content="2023-10-31" />
+<meta name="date" content="2024-06-21" />
 
 <title>Analysing and visualising pathway enrichment in multi-omics data using ActivePathways</title>
 
@@ -342,7 +342,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 enrichment in multi-omics data using ActivePathways</h1>
 <h4 class="author">Mykhaylo Slobodyanyuk, Jonathan Barenboim and Juri
 Reimand</h4>
-<h4 class="date">2023-10-31</h4>
+<h4 class="date">2024-06-21</h4>
 
 
 
@@ -459,26 +459,26 @@ paper)</a>.</p>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>gmt_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;hsapiens_REAC_subset.gmt&#39;</span>, <span class="at">package =</span> <span class="st">&#39;ActivePathways&#39;</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   4.491268e-05       358
 ##  2:  REAC:422475                 Axon guidance   4.625918e-04       555
-##  3:  REAC:177929             Signaling by EGFR   6.197504e-04       366
 ##                                              overlap       evidence
+##                                               &lt;list&gt;         &lt;list&gt;
 ##  1:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...            CDS
 ##  2:          PIK3CA,KRAS,BRAF,NRAS,CALM2,RPS6KA3,... X3UTR,promCore
-##  3:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...            CDS
 ##                              Genes_X3UTR Genes_X5UTR
+##                                   &lt;list&gt;      &lt;list&gt;
 ##  1:                                   NA          NA
 ##  2: CALM2,ARPC2,RHOA,NUMB,CALM1,ACTB,...          NA
-##  3:                                   NA          NA
 ##                                      Genes_CDS
+##                                         &lt;list&gt;
 ##  1:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...
 ##  2:                                         NA
-##  3:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...
 ##                                  Genes_promCore
+##                                          &lt;list&gt;
 ##  1:                                          NA
 ##  2: EFNA1,IQGAP1,COL4A1,SCN2B,RPS6KA3,CALM2,...
-##  3:                                          NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 31 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 32 rows ]</code></pre>
 </div>
 <div id="activepathways-2.0-directional-integration-of-multi-omics-data" class="section level2">
 <h2>ActivePathways 2.0 Directional integration of multi-omics data</h2>
@@ -726,25 +726,26 @@ incorporated in the data integration.</p>
 ## [4] &quot;REAC:R-HSA-9013149&quot;</code></pre>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>enriched_pathways[enriched_pathways<span class="sc">$</span>term_id <span class="sc">%in%</span> pathways_lost_in_directional_integration,] </span></code></pre></div>
 <pre><code>##               term_id                              term_name adjusted_p_val
+##                &lt;char&gt;                                 &lt;char&gt;          &lt;num&gt;
 ## 1: REAC:R-HSA-3858494 Beta-catenin independent WNT signaling    0.013437464
 ## 2:   REAC:R-HSA-69206                        G1/S Transition    0.026263457
 ## 3:   REAC:R-HSA-69242                                S Phase    0.009478766
-## 4: REAC:R-HSA-9013149                      RAC1 GTPase cycle    0.047568911
 ##    term_size                                  overlap    evidence
+##        &lt;int&gt;                                   &lt;list&gt;      &lt;list&gt;
 ## 1:       143 PSMA5,PSMB4,PSMC5,PSMD11,PSMA8,GNG13,... rna,protein
 ## 2:       130  PSMA5,PSMB4,CDK4,PSMC5,PSMD11,CCNB1,...     protein
 ## 3:       162   PSMA5,PSMB4,RFC3,CDK4,PSMC5,PSMD11,...    combined
-## 4:       184 SRGAP1,TIAM1,BAIAP2,FMNL1,DOCK9,PAK3,...         rna
 ##                                       Genes_rna
+##                                          &lt;list&gt;
 ## 1:       GNG13,PSMC1,PSMA5,PSMB4,ITPR3,DVL1,...
 ## 2:                                           NA
 ## 3:                                           NA
-## 4: SRGAP1,TIAM1,FMNL1,ARHGAP30,FARP2,DOCK10,...
 ##                                Genes_protein
+##                                       &lt;list&gt;
 ## 1: PSMA8,PSMD11,PSMA5,PRKG1,PSMD10,PSMB4,...
 ## 2:   PSMD11,PSMA5,PSMD10,PSMB4,CDK7,ORC2,...
 ## 3:                                        NA
-## 4:                                        NA</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 1 row ]</code></pre>
 <p>An example of a lost pathway is Beta-catenin independent WNT
 signaling. Out of the 32 genes that contribute to this pathway
 enrichment, 10 genes are in directional conflict. The enrichment is no
@@ -861,22 +862,22 @@ that have less than 10 or more than 500 annotated genes.</p>
 <code>ActivePathways</code></p>
 <div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   0.0002890847       358
 ##  2:  REAC:177929             Signaling by EGFR   0.0015162274       366
-##  3: REAC:2559583           Cellular Senescence   0.0001560920       196
 ##                                              overlap  evidence
+##                                               &lt;list&gt;    &lt;list&gt;
 ##  1:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...       CDS
 ##  2:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...       CDS
-##  3:           TP53,RB1,ATM,MAP2K7,CDKN1A,RPS6KA3,...       CDS
 ##                            Genes_X3UTR Genes_X5UTR
+##                                 &lt;list&gt;      &lt;list&gt;
 ##  1:                                 NA          NA
 ##  2:                                 NA          NA
-##  3:                                 NA          NA
 ##                                      Genes_CDS Genes_promCore
+##                                         &lt;list&gt;         &lt;list&gt;
 ##  1:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...             NA
 ##  2:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...             NA
-##  3:      TP53,RB1,ATM,MAP2K7,CDKN1A,CDKN1B,...             NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 28 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 29 rows ]</code></pre>
 <p>This filtering can also be done automatically using the
 <code>geneset_filter</code> option to the <code>ActivePathways</code>
 function. By default, <code>ActivePathways</code> removes gene sets with
@@ -891,22 +892,22 @@ deflation of results. A stricter filter can be applied by running
 <code>geneset_filter = c(10, 500)</code>.</p>
 <div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">geneset_filter =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">500</span>))</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   3.660807e-05       358
 ##  2:  REAC:177929             Signaling by EGFR   5.039994e-04       366
-##  3: REAC:2559583           Cellular Senescence   5.366637e-05       196
 ##                                              overlap  evidence
+##                                               &lt;list&gt;    &lt;list&gt;
 ##  1:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...       CDS
 ##  2:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...       CDS
-##  3:           TP53,RB1,ATM,MAP2K7,CDKN1A,RPS6KA3,...       CDS
 ##                            Genes_X3UTR Genes_X5UTR
+##                                 &lt;list&gt;      &lt;list&gt;
 ##  1:                                 NA          NA
 ##  2:                                 NA          NA
-##  3:                                 NA          NA
 ##                                      Genes_CDS Genes_promCore
+##                                         &lt;list&gt;         &lt;list&gt;
 ##  1:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...             NA
 ##  2:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...             NA
-##  3:      TP53,RB1,ATM,MAP2K7,CDKN1A,CDKN1B,...             NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 28 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 29 rows ]</code></pre>
 <p>This GMT object can be saved to a file</p>
 <div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a><span class="fu">write.GMT</span>(gmt, <span class="st">&#39;hsapiens_REAC_subset_filtered.gmt&#39;</span>)</span></code></pre></div>
 </div>
@@ -940,22 +941,22 @@ ActivePathways analysis.</p>
 <span id="cb70-2"><a href="#cb70-2" tabindex="-1"></a>background <span class="ot">&lt;-</span> background[background <span class="sc">!=</span> <span class="st">&#39;TP53&#39;</span>]</span>
 <span id="cb70-3"><a href="#cb70-3" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">background =</span> background)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   0.0022333168       358
 ##  2:  REAC:422475                 Axon guidance   0.0001161168       555
-##  3:  REAC:177929             Signaling by EGFR   0.0043366915       366
 ##                                              overlap  evidence
+##                                               &lt;list&gt;    &lt;list&gt;
 ##  1:               PIK3CA,KRAS,PTEN,BRAF,NRAS,B2M,...       CDS
 ##  2:          PIK3CA,KRAS,BRAF,NRAS,CALM2,RPS6KA3,...     X3UTR
-##  3:             PIK3CA,KRAS,PTEN,BRAF,NRAS,CALM2,...       CDS
 ##                              Genes_X3UTR Genes_X5UTR
+##                                   &lt;list&gt;      &lt;list&gt;
 ##  1:                                   NA          NA
 ##  2: CALM2,ARPC2,RHOA,NUMB,CALM1,ACTB,...          NA
-##  3:                                   NA          NA
 ##                                     Genes_CDS Genes_promCore
+##                                        &lt;list&gt;         &lt;list&gt;
 ##  1:     PTEN,KRAS,PIK3CA,BRAF,NRAS,CDKN1A,...             NA
 ##  2:                                        NA             NA
-##  3:     PTEN,KRAS,PIK3CA,BRAF,NRAS,CDKN1A,...             NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 28 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 29 rows ]</code></pre>
 <p>Note that only the genes found in the background set are used for
 testing enrichment. Any genes in the input data that are not in the
 background set will be automatically removed by
@@ -1024,43 +1025,43 @@ weight to the <code>CDS</code> column.</p>
 ## PTEN 2.180301e-32  0.3437851</code></pre>
 <div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   4.491268e-05       358
 ##  2:  REAC:422475                 Axon guidance   4.625918e-04       555
-##  3:  REAC:177929             Signaling by EGFR   6.197504e-04       366
 ##                                              overlap       evidence
+##                                               &lt;list&gt;         &lt;list&gt;
 ##  1:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...            CDS
 ##  2:          PIK3CA,KRAS,BRAF,NRAS,CALM2,RPS6KA3,... X3UTR,promCore
-##  3:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...            CDS
 ##                              Genes_X3UTR Genes_X5UTR
+##                                   &lt;list&gt;      &lt;list&gt;
 ##  1:                                   NA          NA
 ##  2: CALM2,ARPC2,RHOA,NUMB,CALM1,ACTB,...          NA
-##  3:                                   NA          NA
 ##                                      Genes_CDS
+##                                         &lt;list&gt;
 ##  1:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...
 ##  2:                                         NA
-##  3:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...
 ##                                  Genes_promCore
+##                                          &lt;list&gt;
 ##  1:                                          NA
 ##  2: EFNA1,IQGAP1,COL4A1,SCN2B,RPS6KA3,CALM2,...
-##  3:                                          NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 31 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 32 rows ]</code></pre>
 <div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores2, gmt_file)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   0.0003694968       358
 ##  2:  REAC:422475                 Axon guidance   0.0051873493       555
 ##  3:  REAC:177929             Signaling by EGFR   0.0014545468       366
-##  4: REAC:2559583           Cellular Senescence   0.0005822291       196
 ##                                     overlap evidence
+##                                      &lt;list&gt;   &lt;list&gt;
 ##  1:     TP53,PIK3CA,PTEN,KRAS,BRAF,NRAS,...      CDS
 ##  2: PIK3CA,KRAS,BRAF,NRAS,RPS6KA3,CALM2,... combined
 ##  3:     TP53,PIK3CA,PTEN,KRAS,BRAF,NRAS,...      CDS
-##  4:  TP53,RB1,ATM,MAP2K7,CDKN1A,RPS6KA3,...      CDS
 ##                                      Genes_CDS Genes_non_coding
+##                                         &lt;list&gt;           &lt;list&gt;
 ##  1:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...               NA
 ##  2:                                         NA               NA
 ##  3:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...               NA
-##  4:      TP53,RB1,ATM,MAP2K7,CDKN1A,CDKN1B,...               NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 26 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 27 rows ]</code></pre>
 </div>
 <div id="cutoff-for-filtering-the-ranked-gene-list-for-pathway-enrichment-analysis" class="section level2">
 <h2>Cutoff for filtering the ranked gene list for pathway enrichment
@@ -1109,26 +1110,26 @@ adjustment (not recommended in most cases).</p>
 <div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file)</span>
 <span id="cb96-2"><a href="#cb96-2" tabindex="-1"></a>res</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
+##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   4.491268e-05       358
 ##  2:  REAC:422475                 Axon guidance   4.625918e-04       555
-##  3:  REAC:177929             Signaling by EGFR   6.197504e-04       366
 ##                                              overlap       evidence
+##                                               &lt;list&gt;         &lt;list&gt;
 ##  1:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...            CDS
 ##  2:          PIK3CA,KRAS,BRAF,NRAS,CALM2,RPS6KA3,... X3UTR,promCore
-##  3:              TP53,PIK3CA,KRAS,PTEN,BRAF,NRAS,...            CDS
 ##                              Genes_X3UTR Genes_X5UTR
+##                                   &lt;list&gt;      &lt;list&gt;
 ##  1:                                   NA          NA
 ##  2: CALM2,ARPC2,RHOA,NUMB,CALM1,ACTB,...          NA
-##  3:                                   NA          NA
 ##                                      Genes_CDS
+##                                         &lt;list&gt;
 ##  1:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...
 ##  2:                                         NA
-##  3:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...
 ##                                  Genes_promCore
+##                                          &lt;list&gt;
 ##  1:                                          NA
 ##  2: EFNA1,IQGAP1,COL4A1,SCN2B,RPS6KA3,CALM2,...
-##  3:                                          NA
-##  [ reached getOption(&quot;max.print&quot;) -- omitted 31 rows ]</code></pre>
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 32 rows ]</code></pre>
 <p>The columns <code>term_id</code>, <code>term_name</code>, and
 <code>term_size</code> give information about each pathway detected in
 the enrichment analysis. The <code>adjusted_p_val</code> column with the
