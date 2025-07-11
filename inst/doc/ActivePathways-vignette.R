@@ -154,6 +154,37 @@ pathway_gene_directions[directional_conflict_genes,]
 length(directional_conflict_genes)
 
 ## -----------------------------------------------------------------------------
+fname_GMT2 <- system.file("extdata", "hsapiens_REAC_subset2.gmt", 
+        package = "ActivePathways")
+
+# Perform integrative pathway enrichment analysis with no directionality
+enriched_pathways <- ActivePathways(
+        pval_matrix, gmt = fname_GMT2, cytoscape_file_tag = "Original_")
+
+# Perform directional integration and pathway enrichment analysis
+constraints_vector <- c(1,1)
+
+enriched_pathways_directional <- ActivePathways(
+        pval_matrix, gmt = fname_GMT2, cytoscape_file_tag = "Directional_", merge_method = "DPM",
+        scores_direction = dir_matrix, constraints_vector = constraints_vector)
+
+## -----------------------------------------------------------------------------
+# Merge the results from both analyses
+merged_results <- merge_results(
+  enriched_pathways, enriched_pathways_directional,
+  gmt_file = fname_GMT2,
+  output_prefix = "Aggregated",
+  col_colors = c("#FF0000", "#00FF00", "#FFFFF0")
+)
+
+## -----------------------------------------------------------------------------
+pathways_lost_in_directional_integration = 
+        setdiff(enriched_pathways$term_id, enriched_pathways_directional$term_id)
+pathways_lost_in_directional_integration
+
+enriched_pathways[enriched_pathways$term_id %in% pathways_lost_in_directional_integration,]
+
+## -----------------------------------------------------------------------------
 nrow(ActivePathways(scores, gmt_file, significant = 0.05))
 nrow(ActivePathways(scores, gmt_file, significant = 0.1))
 

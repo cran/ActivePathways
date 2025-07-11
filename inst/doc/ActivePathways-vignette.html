@@ -12,7 +12,7 @@
 
 <meta name="author" content="Mykhaylo Slobodyanyuk, Jonathan Barenboim and Juri Reimand" />
 
-<meta name="date" content="2024-07-28" />
+<meta name="date" content="2025-07-11" />
 
 <title>Analysing and visualising pathway enrichment in multi-omics data using ActivePathways</title>
 
@@ -342,7 +342,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 enrichment in multi-omics data using ActivePathways</h1>
 <h4 class="author">Mykhaylo Slobodyanyuk, Jonathan Barenboim and Juri
 Reimand</h4>
-<h4 class="date">2024-07-28</h4>
+<h4 class="date">2025-07-11</h4>
 
 
 
@@ -411,8 +411,8 @@ and core promoters (promCore).</p>
 <p>To analyse these driver genes using existing knowledge of gene
 function, we will use gene sets corresponding to known molecular
 pathways from the Reactome database. These gene sets are commonly
-distributed in text files in the GMT format <a href="https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GMT:_Gene_Matrix_Transposed_file_format_.28.2A.gmt.29">(Gene
-Matrix Transposed)</a> file.</p>
+distributed in text files in the GMT format (Gene Matrix Transposed)
+file.</p>
 <p>Let’s start by reading the data from the files embedded in the R
 package. For the p-value matrix, <code>ActivePathways</code> expects an
 object of the matrix class so the table has to be cast to the correct
@@ -451,7 +451,7 @@ heavily filtered and outdated; thus users must provide their own GMT
 file when using the package. These GMT files can be acquired from
 multiple <a href="https://baderlab.org/GeneSets">sources</a> such as
 Gene Ontology, Reactome and others. For better accuracy and statistical
-power these pathway databases should be combined. Acquiring an <a href="http://download.baderlab.org/EM_Genesets/current_release/">up-to-date
+power these pathway databases should be combined. Acquiring an <a href="https://download.baderlab.org/EM_Genesets/current_release/">up-to-date
 GMT file</a> is essential to avoid using unreliable outdated annotations
 <a href="https://www.nature.com/articles/nmeth.3963">(see this
 paper)</a>.</p>
@@ -797,9 +797,81 @@ analysis</p>
 ## PSMB6   -1       1</code></pre>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">length</span>(directional_conflict_genes)</span></code></pre></div>
 <pre><code>## [1] 10</code></pre>
+</div>
+</div>
+<div id="comparing-standard-and-directional-pathway-analysis" class="section level2">
+<h2>Comparing standard and directional pathway analysis</h2>
 <p>To visualise differences in biological pathways between
 ActivePathways analyses with or without a directional penalty, we
 combine both outputs into a single enrichment map for <a href="#visualizing-directional-impact-with-node-borders">plotting</a>.</p>
+<p>To explore how changes on the individual gene level impact biological
+pathways, we can compare results before and after incorporating a
+directional penalty.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>fname_GMT2 <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;hsapiens_REAC_subset2.gmt&quot;</span>, </span>
+<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a>        <span class="at">package =</span> <span class="st">&quot;ActivePathways&quot;</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a><span class="co"># Perform integrative pathway enrichment analysis with no directionality</span></span>
+<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a>enriched_pathways <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(</span>
+<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a>        pval_matrix, <span class="at">gmt =</span> fname_GMT2, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;Original_&quot;</span>)</span>
+<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a></span>
+<span id="cb52-8"><a href="#cb52-8" tabindex="-1"></a><span class="co"># Perform directional integration and pathway enrichment analysis</span></span>
+<span id="cb52-9"><a href="#cb52-9" tabindex="-1"></a>constraints_vector <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>)</span>
+<span id="cb52-10"><a href="#cb52-10" tabindex="-1"></a></span>
+<span id="cb52-11"><a href="#cb52-11" tabindex="-1"></a>enriched_pathways_directional <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(</span>
+<span id="cb52-12"><a href="#cb52-12" tabindex="-1"></a>        pval_matrix, <span class="at">gmt =</span> fname_GMT2, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;Directional_&quot;</span>, <span class="at">merge_method =</span> <span class="st">&quot;DPM&quot;</span>,</span>
+<span id="cb52-13"><a href="#cb52-13" tabindex="-1"></a>        <span class="at">scores_direction =</span> dir_matrix, <span class="at">constraints_vector =</span> constraints_vector)</span></code></pre></div>
+<div id="merging-results-for-visualization-in-cytoscape" class="section level3">
+<h3>Merging results for visualization in Cytoscape</h3>
+<p>To visualize differences in biological pathways between
+ActivePathways analyses with or without a directional penalty, we can
+combine both outputs into a single enrichment map. The
+<code>merge_results</code> and <code>merge_gmt</code> functions make
+this process straightforward:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># Merge the results from both analyses</span></span>
+<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a>merged_results <span class="ot">&lt;-</span> <span class="fu">merge_results</span>(</span>
+<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>  enriched_pathways, enriched_pathways_directional,</span>
+<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>  <span class="at">gmt_file =</span> fname_GMT2,</span>
+<span id="cb53-5"><a href="#cb53-5" tabindex="-1"></a>  <span class="at">output_prefix =</span> <span class="st">&quot;Aggregated&quot;</span>,</span>
+<span id="cb53-6"><a href="#cb53-6" tabindex="-1"></a>  <span class="at">col_colors =</span> <span class="fu">c</span>(<span class="st">&quot;#FF0000&quot;</span>, <span class="st">&quot;#00FF00&quot;</span>, <span class="st">&quot;#FFFFF0&quot;</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>This creates three files needed for Cytoscape visualization: 1.
+<code>Aggregated_pathways.txt</code> - Combined significant pathways
+with p-values 2. <code>Aggregated_subgroups.txt</code> - Information
+about which datasets support each pathway and directional impact 3.
+<code>Aggregated_pathways.gmt</code> - A filtered GMT file containing
+only the significant pathways</p>
+</div>
+<div id="examining-pathways-affected-by-directional-analysis" class="section level3">
+<h3>Examining pathways affected by directional analysis</h3>
+<p>Let’s examine the pathways that are lost when directional information
+is incorporated in the data integration:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>pathways_lost_in_directional_integration <span class="ot">=</span> </span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a>        <span class="fu">setdiff</span>(enriched_pathways<span class="sc">$</span>term_id, enriched_pathways_directional<span class="sc">$</span>term_id)</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>pathways_lost_in_directional_integration</span></code></pre></div>
+<pre><code>## [1] &quot;REAC:R-HSA-3858494&quot; &quot;REAC:R-HSA-69206&quot;   &quot;REAC:R-HSA-69242&quot;  
+## [4] &quot;REAC:R-HSA-9013149&quot;</code></pre>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a>enriched_pathways[enriched_pathways<span class="sc">$</span>term_id <span class="sc">%in%</span> pathways_lost_in_directional_integration,]</span></code></pre></div>
+<pre><code>##               term_id                              term_name adjusted_p_val
+##                &lt;char&gt;                                 &lt;char&gt;          &lt;num&gt;
+## 1: REAC:R-HSA-3858494 Beta-catenin independent WNT signaling    0.013437464
+## 2:   REAC:R-HSA-69206                        G1/S Transition    0.026263457
+## 3:   REAC:R-HSA-69242                                S Phase    0.009478766
+##    term_size                                  overlap    evidence
+##        &lt;int&gt;                                   &lt;list&gt;      &lt;list&gt;
+## 1:       143 PSMA5,PSMB4,PSMC5,PSMD11,PSMA8,GNG13,... rna,protein
+## 2:       130  PSMA5,PSMB4,CDK4,PSMC5,PSMD11,CCNB1,...     protein
+## 3:       162   PSMA5,PSMB4,RFC3,CDK4,PSMC5,PSMD11,...    combined
+##                                       Genes_rna
+##                                          &lt;list&gt;
+## 1:       GNG13,PSMC1,PSMA5,PSMB4,ITPR3,DVL1,...
+## 2:                                           NA
+## 3:                                           NA
+##                                Genes_protein
+##                                       &lt;list&gt;
+## 1: PSMA8,PSMD11,PSMA5,PRKG1,PSMD10,PSMB4,...
+## 2:   PSMD11,PSMA5,PSMD10,PSMB4,CDK7,ORC2,...
+## 3:                                        NA
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 1 row ]</code></pre>
 </div>
 </div>
 <div id="significance-threshold-and-returning-all-results" class="section level2">
@@ -811,9 +883,9 @@ resulting pathway to be considered statistically significant. Only the
 significant pathways are returned. P-values from pathway enrichment
 analysis are adjusted for multiple testing correction to provide a more
 conservative analysis (see below).</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">significant =</span> <span class="fl">0.05</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">significant =</span> <span class="fl">0.05</span>))</span></code></pre></div>
 <pre><code>## [1] 33</code></pre>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">significant =</span> <span class="fl">0.1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">significant =</span> <span class="fl">0.1</span>))</span></code></pre></div>
 <pre><code>## [1] 36</code></pre>
 </div>
 <div id="gmt-objects" class="section level2">
@@ -827,11 +899,11 @@ a file using the <code>read.GMT</code> function. The GMT is structured
 as a list of terms (e.g., molecular pathways, biological processes,
 etc.). In the GMT object, each term is a list containing an id, a name,
 and the list of genes associated with this term.</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a>gmt <span class="ot">&lt;-</span> <span class="fu">read.GMT</span>(gmt_file)</span>
-<span id="cb56-2"><a href="#cb56-2" tabindex="-1"></a><span class="fu">names</span>(gmt[[<span class="dv">1</span>]])</span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a>gmt <span class="ot">&lt;-</span> <span class="fu">read.GMT</span>(gmt_file)</span>
+<span id="cb62-2"><a href="#cb62-2" tabindex="-1"></a><span class="fu">names</span>(gmt[[<span class="dv">1</span>]])</span></code></pre></div>
 <pre><code>## [1] &quot;id&quot;    &quot;name&quot;  &quot;genes&quot;</code></pre>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a><span class="co"># Pretty-print the GMT</span></span>
-<span id="cb58-2"><a href="#cb58-2" tabindex="-1"></a>gmt[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a><span class="co"># Pretty-print the GMT</span></span>
+<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a>gmt[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
 <pre><code>## REAC:1630316 - Glycosaminoglycan metabolism 
 ##  ST3GAL1, CHP1, B4GALT5, ST3GAL4, SLC9A1, CHST11, B3GAT3, SLC26A1, ARSB, ABCC5, LUM, PAPSS1, SDC4, NAGLU, AC022400.6, HYAL1, NDST3, SLC35B2, B3GAT1, CHST2, DCN, CEMIP, IDS, IDUA, HS3ST3B1, B3GNT7, CHST12, CHST14, BCAN, B4GALT3, HS3ST1, B4GALT1, CSPG4, CHPF2, HEXB, UST, XYLT1, NDST2, AL050331.3, NAT6, CHSY3, NCAN, FMOD, B3GNT2, HPSE, ACAN, LYVE1, GPC2, GPC1, B4GALT2, SLC35B3, KERA, GPC4, GUSB, HYAL3, HS6ST3, HAS3, CHPF, OMD, SDC2, B3GNT3, CSGALNACT2, CSPG5, BGN, CHST6, HS6ST2, SDC3, HS2ST1, CD44, AGRN, B3GALT6, PRELP, GLB1, GPC6, B3GNT4, PAPSS2, HS3ST4, CHST9, GNS, CHST1, CSGALNACT1, HS6ST1, CHST7, AL590542.1, HYAL2, HAS1, CHSY1, OGN, B4GAT1, B4GALT4, DSEL, EXT1, SDC1, SLC35D2, EXT2, ST3GAL2, ST3GAL6, CHST3, CHST5, HSPG2, SLC26A2, HEXA, XYLT2, HS3ST6, HS3ST5, GLCE, AC244197.3, B4GALT7, HAS2, NDST4, CHST15, B4GALT6, B3GAT2, STAB2, HMMR, ST3GAL3, VCAN, NDST1, HS3ST2, GPC5, HS3ST3A1, HPSE2, GLB1L, SGSH, GPC3, CHST13, DSE 
 ## 
@@ -840,8 +912,8 @@ and the list of genes associated with this term.</p>
 ## 
 ##  REAC:5358346 - Hedgehog ligand biogenesis 
 ##  PSMB11, PSMD8, PSMB6, PSMB8, PSMD13, PSMA2, PSMB3, PSMB7, PSME2, PSMD1, PSMA8, PSMA1, PSMD2, PSMD14, PSMC1, IHH, SEL1L, SCUBE2, PSMB10, PSMD10, PSMA5, PSMD3, PSMC2, PSMC6, PSME1, PSME4, PSMC4, AC010132.3, PSMD5, UBB, GPC5, PSMA7, PSMB2, PSMD9, SEM1, PSMA3, DISP2, PSMB9, PSMD6, OS9, PSMC3, PSMA6, RPS27A, ADAM17, PSMB1, DHH, PSMF1, HHAT, UBA52, UBC, DERL2, PSMD4, VCP, ERLEC1, PSME3, PSMB4, P4HB, PSMA4, PSMD7, PSMD11, PSMC5, NOTUM, PSMD12, PSMB5, SYVN1, SHH</code></pre>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a><span class="co"># Look at the genes annotated to the first term</span></span>
-<span id="cb60-2"><a href="#cb60-2" tabindex="-1"></a>gmt[[<span class="dv">1</span>]]<span class="sc">$</span>genes</span></code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a><span class="co"># Look at the genes annotated to the first term</span></span>
+<span id="cb66-2"><a href="#cb66-2" tabindex="-1"></a>gmt[[<span class="dv">1</span>]]<span class="sc">$</span>genes</span></code></pre></div>
 <pre><code>##  [1] &quot;ST3GAL1&quot;    &quot;CHP1&quot;       &quot;B4GALT5&quot;    &quot;ST3GAL4&quot;    &quot;SLC9A1&quot;    
 ##  [6] &quot;CHST11&quot;     &quot;B3GAT3&quot;     &quot;SLC26A1&quot;    &quot;ARSB&quot;       &quot;ABCC5&quot;     
 ## [11] &quot;LUM&quot;        &quot;PAPSS1&quot;     &quot;SDC4&quot;       &quot;NAGLU&quot;      &quot;AC022400.6&quot;
@@ -850,17 +922,17 @@ and the list of genes associated with this term.</p>
 ## [26] &quot;B3GNT7&quot;     &quot;CHST12&quot;     &quot;CHST14&quot;     &quot;BCAN&quot;       &quot;B4GALT3&quot;   
 ## [31] &quot;HS3ST1&quot;     &quot;B4GALT1&quot;    &quot;CSPG4&quot;      &quot;CHPF2&quot;      &quot;HEXB&quot;      
 ##  [ reached getOption(&quot;max.print&quot;) -- omitted 92 entries ]</code></pre>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="co"># Get the full name of Reactome pathway 2424491</span></span>
-<span id="cb62-2"><a href="#cb62-2" tabindex="-1"></a>gmt<span class="sc">$</span><span class="st">`</span><span class="at">REAC:2424491</span><span class="st">`</span><span class="sc">$</span>name</span></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" tabindex="-1"></a><span class="co"># Get the full name of Reactome pathway 2424491</span></span>
+<span id="cb68-2"><a href="#cb68-2" tabindex="-1"></a>gmt<span class="sc">$</span><span class="st">`</span><span class="at">REAC:2424491</span><span class="st">`</span><span class="sc">$</span>name</span></code></pre></div>
 <pre><code>## [1] &quot;DAP12 signaling&quot;</code></pre>
 <p>The most common processing step for GMT files is the removal of gene
 sets that are too large or small. Here we remove pathways (gene sets)
 that have less than 10 or more than 500 annotated genes.</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a>gmt <span class="ot">&lt;-</span> <span class="fu">Filter</span>(<span class="cf">function</span>(term) <span class="fu">length</span>(term<span class="sc">$</span>genes) <span class="sc">&gt;=</span> <span class="dv">10</span>, gmt)</span>
-<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a>gmt <span class="ot">&lt;-</span> <span class="fu">Filter</span>(<span class="cf">function</span>(term) <span class="fu">length</span>(term<span class="sc">$</span>genes) <span class="sc">&lt;=</span> <span class="dv">500</span>, gmt)</span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" tabindex="-1"></a>gmt <span class="ot">&lt;-</span> <span class="fu">Filter</span>(<span class="cf">function</span>(term) <span class="fu">length</span>(term<span class="sc">$</span>genes) <span class="sc">&gt;=</span> <span class="dv">10</span>, gmt)</span>
+<span id="cb70-2"><a href="#cb70-2" tabindex="-1"></a>gmt <span class="ot">&lt;-</span> <span class="fu">Filter</span>(<span class="cf">function</span>(term) <span class="fu">length</span>(term<span class="sc">$</span>genes) <span class="sc">&lt;=</span> <span class="dv">500</span>, gmt)</span></code></pre></div>
 <p>The new GMT object can now be used for analysis with
 <code>ActivePathways</code></p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt)</span></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
 ##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   0.0002890847       358
@@ -890,7 +962,7 @@ the multiple testing corrections more stringent, potentially causing
 deflation of results. A stricter filter can be applied by running
 <code>ActivePathways</code> with the parameter
 <code>geneset_filter = c(10, 500)</code>.</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">geneset_filter =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">500</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">geneset_filter =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">500</span>))</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
 ##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   3.660807e-05       358
@@ -909,7 +981,7 @@ deflation of results. A stricter filter can be applied by running
 ##  2:        TP53,PTEN,KRAS,PIK3CA,BRAF,NRAS,...             NA
 ##  [ reached getOption(&quot;max.print&quot;) -- omitted 29 rows ]</code></pre>
 <p>This GMT object can be saved to a file</p>
-<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a><span class="fu">write.GMT</span>(gmt, <span class="st">&#39;hsapiens_REAC_subset_filtered.gmt&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="fu">write.GMT</span>(gmt, <span class="st">&#39;hsapiens_REAC_subset_filtered.gmt&#39;</span>)</span></code></pre></div>
 </div>
 <div id="background-gene-set-for-statistical-analysis" class="section level2">
 <h2>Background gene set for statistical analysis</h2>
@@ -937,9 +1009,9 @@ statistical background set. In this example, we start from the original
 list of genes in the entire GMT and remove one gene, the tumor
 suppressor TP53. The new background set is then used for the
 ActivePathways analysis.</p>
-<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" tabindex="-1"></a>background <span class="ot">&lt;-</span> <span class="fu">makeBackground</span>(gmt)</span>
-<span id="cb70-2"><a href="#cb70-2" tabindex="-1"></a>background <span class="ot">&lt;-</span> background[background <span class="sc">!=</span> <span class="st">&#39;TP53&#39;</span>]</span>
-<span id="cb70-3"><a href="#cb70-3" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">background =</span> background)</span></code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" tabindex="-1"></a>background <span class="ot">&lt;-</span> <span class="fu">makeBackground</span>(gmt)</span>
+<span id="cb76-2"><a href="#cb76-2" tabindex="-1"></a>background <span class="ot">&lt;-</span> background[background <span class="sc">!=</span> <span class="st">&#39;TP53&#39;</span>]</span>
+<span id="cb76-3"><a href="#cb76-3" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">background =</span> background)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
 ##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   0.0022333168       358
@@ -993,16 +1065,16 @@ method are the same as Fisher’s, but their P-values are more
 conservative. This is the case for Strube’s method as well, in which the
 top scoring genes are the same as Stouffer’s method, but the P-values
 are more conservative.</p>
-<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Fisher&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Fisher&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
 <pre><code>##         TP53          VHL       PIK3CA         KRAS         PTEN 
 ## 2.275933e-32 4.677780e-31 9.878802e-30 5.169163e-29 5.813021e-29</code></pre>
-<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Brown&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Brown&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
 <pre><code>##         TP53          VHL       PIK3CA         KRAS         PTEN 
 ## 2.850936e-21 1.933490e-20 1.334809e-19 3.808817e-19 4.102937e-19</code></pre>
-<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Stouffer&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Stouffer&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
 <pre><code>##         TP53          VHL       PIK3CA         KRAS         PTEN 
 ## 5.889756e-18 1.228308e-15 3.067765e-15 1.396875e-13 2.275649e-13</code></pre>
-<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Strube&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">merge_p_values</span>(scores, <span class="st">&#39;Strube&#39;</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
 <pre><code>##         TP53          VHL       PIK3CA         KRAS         PTEN 
 ## 1.170932e-11 3.249661e-10 5.746455e-10 6.206504e-09 8.414282e-09</code></pre>
 <p>This function can be used to combine some of the data before the
@@ -1013,17 +1085,17 @@ can merge the columns <code>X5UTR</code>, <code>X3UTR</code>, and
 and core promoters of genes, respectively). This will consider the three
 non-coding regions as a single column, rather than giving them all equal
 weight to the <code>CDS</code> column.</p>
-<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" tabindex="-1"></a>scores2 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(scores[, <span class="st">&#39;CDS&#39;</span>], <span class="fu">merge_p_values</span>(scores[, <span class="fu">c</span>(<span class="st">&#39;X3UTR&#39;</span>, <span class="st">&#39;X5UTR&#39;</span>, <span class="st">&#39;promCore&#39;</span>)], <span class="st">&#39;Brown&#39;</span>))</span>
-<span id="cb80-2"><a href="#cb80-2" tabindex="-1"></a><span class="fu">colnames</span>(scores2) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;CDS&#39;</span>, <span class="st">&#39;non_coding&#39;</span>)</span>
-<span id="cb80-3"><a href="#cb80-3" tabindex="-1"></a>scores[<span class="fu">c</span>(<span class="dv">2179</span>, <span class="dv">1760</span>),]</span></code></pre></div>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" tabindex="-1"></a>scores2 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(scores[, <span class="st">&#39;CDS&#39;</span>], <span class="fu">merge_p_values</span>(scores[, <span class="fu">c</span>(<span class="st">&#39;X3UTR&#39;</span>, <span class="st">&#39;X5UTR&#39;</span>, <span class="st">&#39;promCore&#39;</span>)], <span class="st">&#39;Brown&#39;</span>))</span>
+<span id="cb86-2"><a href="#cb86-2" tabindex="-1"></a><span class="fu">colnames</span>(scores2) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;CDS&#39;</span>, <span class="st">&#39;non_coding&#39;</span>)</span>
+<span id="cb86-3"><a href="#cb86-3" tabindex="-1"></a>scores[<span class="fu">c</span>(<span class="dv">2179</span>, <span class="dv">1760</span>),]</span></code></pre></div>
 <pre><code>##          X3UTR       X5UTR          CDS  promCore
 ## TP53 0.8331532 0.005613463 1.842404e-33 0.0254239
 ## PTEN 0.1627596 0.310132725 2.180301e-32 0.6867016</code></pre>
-<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" tabindex="-1"></a>scores2[<span class="fu">c</span>(<span class="dv">2179</span>, <span class="dv">1760</span>),]</span></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" tabindex="-1"></a>scores2[<span class="fu">c</span>(<span class="dv">2179</span>, <span class="dv">1760</span>),]</span></code></pre></div>
 <pre><code>##               CDS non_coding
 ## TP53 1.842404e-33  0.0189964
 ## PTEN 2.180301e-32  0.3437851</code></pre>
-<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file)</span></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores, gmt_file)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
 ##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   4.491268e-05       358
@@ -1045,7 +1117,7 @@ weight to the <code>CDS</code> column.</p>
 ##  1:                                          NA
 ##  2: EFNA1,IQGAP1,COL4A1,SCN2B,RPS6KA3,CALM2,...
 ##  [ reached getOption(&quot;max.print&quot;) -- omitted 32 rows ]</code></pre>
-<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores2, gmt_file)</span></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" tabindex="-1"></a><span class="fu">ActivePathways</span>(scores2, gmt_file)</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
 ##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   0.0003694968       358
@@ -1078,9 +1150,9 @@ the default option provides a relatively lenient approach to filtering
 the input data. This is useful for finding additional genes with weaker
 signals that associate with well-annotated and strongly significant
 genes in the pathway and functional context.</p>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file))</span></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file))</span></code></pre></div>
 <pre><code>## [1] 33</code></pre>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cutoff =</span> <span class="fl">0.01</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cutoff =</span> <span class="fl">0.01</span>))</span></code></pre></div>
 <pre><code>## [1] 18</code></pre>
 </div>
 <div id="adjusting-p-values-using-multiple-testing-correction" class="section level2">
@@ -1098,17 +1170,17 @@ multiple testing corrections and all methods in this function are
 available. By default, ‘holm’ correction is used. The option
 <code>correction_method = &#39;none&#39;</code> can be used to override P-value
 adjustment (not recommended in most cases).</p>
-<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file))</span></code></pre></div>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file))</span></code></pre></div>
 <pre><code>## [1] 33</code></pre>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">correction_method =</span> <span class="st">&#39;none&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">correction_method =</span> <span class="st">&#39;none&#39;</span>))</span></code></pre></div>
 <pre><code>## [1] 88</code></pre>
 </div>
 <div id="the-results-table-of-activepathways" class="section level2">
 <h2>The results table of ActivePathways</h2>
 <p>Consider the results object from the basic use case of
 <code>ActivePathways</code></p>
-<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file)</span>
-<span id="cb96-2"><a href="#cb96-2" tabindex="-1"></a>res</span></code></pre></div>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file)</span>
+<span id="cb102-2"><a href="#cb102-2" tabindex="-1"></a>res</span></code></pre></div>
 <pre><code>##          term_id                     term_name adjusted_p_val term_size
 ##           &lt;char&gt;                        &lt;char&gt;          &lt;num&gt;     &lt;int&gt;
 ##  1: REAC:2424491               DAP12 signaling   4.491268e-05       358
@@ -1141,7 +1213,7 @@ molecular pathway or biological process). These genes were quantified
 across multiple input omics datasets and prioritized based on their
 joint significance in the input data. Note that the genes with the
 strongest scores across the multiple datasets are listed first.</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" tabindex="-1"></a>res<span class="sc">$</span>overlap[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" tabindex="-1"></a>res<span class="sc">$</span>overlap[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
 <pre><code>## [[1]]
 ##  [1] &quot;TP53&quot;   &quot;PIK3CA&quot; &quot;KRAS&quot;   &quot;PTEN&quot;   &quot;BRAF&quot;   &quot;NRAS&quot;   &quot;B2M&quot;    &quot;CALM2&quot; 
 ##  [9] &quot;CDKN1A&quot; &quot;CDKN1B&quot;
@@ -1181,7 +1253,7 @@ As a counter-example, the record for the pathway
 found to be enriched when considering either the <code>X3UTR</code>
 column, the <code>promCore</code> column, or the combined omics
 datasets.</p>
-<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" tabindex="-1"></a><span class="fu">unlist</span>(res[res<span class="sc">$</span>term_id <span class="sc">==</span> <span class="st">&quot;REAC:422475&quot;</span>,<span class="st">&quot;evidence&quot;</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" tabindex="-1"></a><span class="fu">unlist</span>(res[res<span class="sc">$</span>term_id <span class="sc">==</span> <span class="st">&quot;REAC:422475&quot;</span>,<span class="st">&quot;evidence&quot;</span>])</span></code></pre></div>
 <pre><code>##  evidence1  evidence2 
 ##    &quot;X3UTR&quot; &quot;promCore&quot;</code></pre>
 <p>Finally, if a pathway is found to be enriched only with the combined
@@ -1210,14 +1282,14 @@ Fortunately, the <code>fwrite</code> function of <code>data.table</code>
 can be used to write the file directly and the ActivePathways package
 includes the function <code>export_as_CSV</code> as a shortcut that uses
 the vertical bar symbol to concatenate gene lists.</p>
-<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" tabindex="-1"></a>result_file <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&#39;ActivePathways_results.csv&#39;</span>, <span class="at">sep =</span> <span class="st">&#39;/&#39;</span>)</span>
-<span id="cb102-2"><a href="#cb102-2" tabindex="-1"></a><span class="fu">export_as_CSV</span> (res, result_file) <span class="co"># remove comment to run</span></span>
-<span id="cb102-3"><a href="#cb102-3" tabindex="-1"></a><span class="fu">read.csv</span>(result_file, <span class="at">stringsAsFactors =</span> F)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,]</span></code></pre></div>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" tabindex="-1"></a>result_file <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&#39;ActivePathways_results.csv&#39;</span>, <span class="at">sep =</span> <span class="st">&#39;/&#39;</span>)</span>
+<span id="cb108-2"><a href="#cb108-2" tabindex="-1"></a><span class="fu">export_as_CSV</span> (res, result_file) <span class="co"># remove comment to run</span></span>
+<span id="cb108-3"><a href="#cb108-3" tabindex="-1"></a><span class="fu">read.csv</span>(result_file, <span class="at">stringsAsFactors =</span> F)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,]</span></code></pre></div>
 <p>The <code>fwrite</code> can be called directly for customised
 output.</p>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" tabindex="-1"></a>result_file <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&#39;ActivePathways_results2.txt&#39;</span>, <span class="at">sep =</span> <span class="st">&#39;/&#39;</span>)</span>
-<span id="cb103-2"><a href="#cb103-2" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">fwrite</span>(res, result_file, <span class="at">sep =</span> <span class="st">&#39;</span><span class="sc">\t</span><span class="st">&#39;</span>, <span class="at">sep2 =</span> <span class="fu">c</span>(<span class="st">&#39;&#39;</span>, <span class="st">&#39;,&#39;</span>, <span class="st">&#39;&#39;</span>))</span>
-<span id="cb103-3"><a href="#cb103-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(result_file)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">collapse =</span> <span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" tabindex="-1"></a>result_file <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&#39;ActivePathways_results2.txt&#39;</span>, <span class="at">sep =</span> <span class="st">&#39;/&#39;</span>)</span>
+<span id="cb109-2"><a href="#cb109-2" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">fwrite</span>(res, result_file, <span class="at">sep =</span> <span class="st">&#39;</span><span class="sc">\t</span><span class="st">&#39;</span>, <span class="at">sep2 =</span> <span class="fu">c</span>(<span class="st">&#39;&#39;</span>, <span class="st">&#39;,&#39;</span>, <span class="st">&#39;&#39;</span>))</span>
+<span id="cb109-3"><a href="#cb109-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(result_file)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">collapse =</span> <span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
 </div>
 </div>
 <div id="visualising-pathway-enrichment-results-using-enrichment-maps-in-cytoscape" class="section level1">
@@ -1231,7 +1303,7 @@ the files needed for building enrichment maps. To create these files, a
 file prefix must be supplied to <code>ActivePathways</code> using the
 argument <code>cytoscape_file_tag</code>. The prefix can be a path to an
 existing writable directory.</p>
-<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>)</span></code></pre></div>
 <p>Four files are written using the prefix:</p>
 <ul>
 <li><p><code>enrichmentMap__pathways.txt</code> contains the table of
@@ -1275,24 +1347,24 @@ accessible location.</p>
 <h2>Required files</h2>
 <p><code>ActivePathways</code> writes four files that are used to build
 enrichment maps in Cytoscape.</p>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__pathways.txt&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>),</span>
-<span id="cb105-2"><a href="#cb105-2" tabindex="-1"></a>           <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__subgroups.txt&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>),</span>
-<span id="cb105-3"><a href="#cb105-3" tabindex="-1"></a>           <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__pathways.gmt&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>),</span>
-<span id="cb105-4"><a href="#cb105-4" tabindex="-1"></a>           <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__legend.pdf&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" tabindex="-1"></a>files <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__pathways.txt&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>),</span>
+<span id="cb111-2"><a href="#cb111-2" tabindex="-1"></a>           <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__subgroups.txt&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>),</span>
+<span id="cb111-3"><a href="#cb111-3" tabindex="-1"></a>           <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__pathways.gmt&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>),</span>
+<span id="cb111-4"><a href="#cb111-4" tabindex="-1"></a>           <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;enrichmentMap__legend.pdf&#39;</span>, <span class="at">package=</span><span class="st">&#39;ActivePathways&#39;</span>))</span></code></pre></div>
 <p>The following commands will perform the basic analysis again and
 write output files required for generating enrichment maps into the
 current working directory of the R session. All file names use the
 prefix <code>enrichmentMap__</code>. The generated files are also
 available in the <code>ActivePathways</code> R package as shown
 above.</p>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" tabindex="-1"></a>gmt_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;hsapiens_REAC_subset.gmt&#39;</span>, <span class="at">package =</span> <span class="st">&#39;ActivePathways&#39;</span>)</span>
-<span id="cb106-2"><a href="#cb106-2" tabindex="-1"></a>scores_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;Adenocarcinoma_scores_subset.tsv&#39;</span>, <span class="at">package =</span> <span class="st">&#39;ActivePathways&#39;</span>)</span>
-<span id="cb106-3"><a href="#cb106-3" tabindex="-1"></a></span>
-<span id="cb106-4"><a href="#cb106-4" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">read.table</span>(scores_file, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">&#39;</span><span class="sc">\t</span><span class="st">&#39;</span>, <span class="at">row.names =</span> <span class="st">&#39;Gene&#39;</span>)</span>
-<span id="cb106-5"><a href="#cb106-5" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(scores)</span>
-<span id="cb106-6"><a href="#cb106-6" tabindex="-1"></a>scores[<span class="fu">is.na</span>(scores)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb106-7"><a href="#cb106-7" tabindex="-1"></a></span>
-<span id="cb106-8"><a href="#cb106-8" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" tabindex="-1"></a>gmt_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;hsapiens_REAC_subset.gmt&#39;</span>, <span class="at">package =</span> <span class="st">&#39;ActivePathways&#39;</span>)</span>
+<span id="cb112-2"><a href="#cb112-2" tabindex="-1"></a>scores_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&#39;extdata&#39;</span>, <span class="st">&#39;Adenocarcinoma_scores_subset.tsv&#39;</span>, <span class="at">package =</span> <span class="st">&#39;ActivePathways&#39;</span>)</span>
+<span id="cb112-3"><a href="#cb112-3" tabindex="-1"></a></span>
+<span id="cb112-4"><a href="#cb112-4" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">read.table</span>(scores_file, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">&#39;</span><span class="sc">\t</span><span class="st">&#39;</span>, <span class="at">row.names =</span> <span class="st">&#39;Gene&#39;</span>)</span>
+<span id="cb112-5"><a href="#cb112-5" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(scores)</span>
+<span id="cb112-6"><a href="#cb112-6" tabindex="-1"></a>scores[<span class="fu">is.na</span>(scores)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb112-7"><a href="#cb112-7" tabindex="-1"></a></span>
+<span id="cb112-8"><a href="#cb112-8" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>)</span></code></pre></div>
 <p>The four files written are:</p>
 <ul>
 <li><p><code>enrichmentMap__pathways.txt</code>, a table of significant
@@ -1309,19 +1381,19 @@ of different omics datasets visualised in the enrichment map.</p></li>
 </ul>
 <p>The following code will examine a few lines of the files generated by
 <code>ActivePathways</code>.</p>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(files[<span class="dv">1</span>])[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">collapse=</span><span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(files[<span class="dv">1</span>])[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">collapse=</span><span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
 <pre><code>## term_id  term_name   adjusted_p_val
 ## REAC:2424491 DAP12 signaling 4.49126833230489e-05
 ## REAC:422475  Axon guidance   0.00046259184602835
 ## REAC:177929  Signaling by EGFR   0.000619750411866923
 ## REAC:2559583 Cellular Senescence 6.59544666946083e-05</code></pre>
-<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(files[<span class="dv">2</span>])[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">collapse=</span><span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(files[<span class="dv">2</span>])[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">collapse=</span><span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
 <pre><code>## term_id  X3UTR   X5UTR   CDS promCore    combined    instruct
 ## REAC:2424491 0   0   1   0   0   piechart: attributelist=&quot;X3UTR,X5UTR,CDS,promCore,combined&quot; colorlist=&quot;#FF0000,#CCFF00,#00FF66,#0066FF,#FFFFF0&quot; showlabels=FALSE
 ## REAC:422475  1   0   0   1   0   piechart: attributelist=&quot;X3UTR,X5UTR,CDS,promCore,combined&quot; colorlist=&quot;#FF0000,#CCFF00,#00FF66,#0066FF,#FFFFF0&quot; showlabels=FALSE
 ## REAC:177929  0   0   1   0   0   piechart: attributelist=&quot;X3UTR,X5UTR,CDS,promCore,combined&quot; colorlist=&quot;#FF0000,#CCFF00,#00FF66,#0066FF,#FFFFF0&quot; showlabels=FALSE
 ## REAC:2559583 0   0   1   0   0   piechart: attributelist=&quot;X3UTR,X5UTR,CDS,promCore,combined&quot; colorlist=&quot;#FF0000,#CCFF00,#00FF66,#0066FF,#FFFFF0&quot; showlabels=FALSE</code></pre>
-<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(files[<span class="dv">3</span>])[<span class="dv">18</span><span class="sc">:</span><span class="dv">19</span>], <span class="at">collapse=</span><span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(<span class="fu">readLines</span>(files[<span class="dv">3</span>])[<span class="dv">18</span><span class="sc">:</span><span class="dv">19</span>], <span class="at">collapse=</span><span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>))</span></code></pre></div>
 <pre><code>## REAC:1257604 PIP3 activates AKT signaling    MTOR    ERBB4   NR4A1   MET TSC2    AGO1    AKT3    PIP4K2A TNRC6B  TRIB3   FOXO3   GSK3A   MDM2    FGF1    PIP5K1A PHLPP1  PPP2CB  KLB PPP2CA  FGF8    CREB1   AKT2    CDKN1B  BAD FGF9    PPP2R5E PIK3AP1 FOXO4   RPS6KB2 AKT1S1  AL358075.4  FGF2    ICOS    BTC CDKN1A  KITLG   FGF17   PIK3CB  PIK3R2  FGF4    FGF18   PIP4K2C FGF7    PDGFA   PRR5    EREG    PPP2R5B FGF19   FGFR1   VAV1    ERBB3   HBEGF   FGF3    PPP2R5C PDGFRB  PDGFB   TNRC6C  CD80    FGFR3   MIR26A2 TRAT1   FGF23   AGO3    PTPN11  PIP5K1B GAB1    MAPK1   LCK NRG1    TNRC6A  MIR26A1 PDPK1   FGF22   CHUK    FOXO1   NRG2    PIK3R1  FGF20   FGFR2   PPP2R5D SRC PIK3CA  TP53    NRG4    MOV10   KIT PIP5K1C NRG3    PTEN    CD19    INS HGF AGO2    PHLPP2  IRS2    PIK3CD  FGFR4   PPP2R5A AKT1    AL672043.1  KL  PIK3R3  EGFR    FRS2    IER3    INSR    MLST8   CD28    FYN AGO4    FGF16   THEM4   FGF5    IRS1    PPP2R1B FGF10   EGF MAPK3   GSK3B   PDGFRA  RICTOR  ERBB2   CASP9   GRB2    PPP2R1A FGF6    MAPKAP1 PIP4K2B INS-IGF2    CD86
 ## REAC:212436  Generic Transcription Pathway   ZNF776  ZNF736  ZNF700  CHM ZNF658B TP53AIP1    CASP10  RARG    ZNF235  HUS1    ZNF200  ZNF17   ZNF664  RRM2B   TFAP2C  ZNF786  PSMB1   ZNF737  TAF5    NDUFA4  COX6B1  TOM1L1  ZNF493  ZNF649  NBN ZNF557  RFC5    POLR2I  ZNF213  PRMT5   ZNF600  ZNF418  ZNF671  MAPK11  ZNF426  SRC TAF11   GTF2H4  BTG2    ZNF655  KIT ERCC2   ZNF677  ZNF709  ZNF234  ATAD2   SCO1    TAF9B   ZNF28   ZNF691  MAPK14  ZNF584  ZNF317  CTGF    ZNF445  ZNF492  ZNF771  KAT5    ZNF558  BCL6    TEAD3   TBL1X   ZIM3    TAF7L   ZNF157  ZNF136  ZNF415  ZNF792  BLM PSMD1   STK11   RICTOR  NELFCD  DDB2    ZNF446  SP1 ZNF727  NOTCH2  RUNX3   TRAPPC2 LAMTOR5 ZNF460  ZNF331  PSMB6   NKX2-5  ZKSCAN5 PPP2R1A MAPKAP1 CITED1  ZNF554  DNA2    MED1    SMAD3   ZNF681  CASP2   JUN ZNF20   ZNF839  ZNF14   CTNNB1  EP300   PSMC4   ZNF189  L3MBTL1 NDRG1   MED15   SPP1    ZNF567  RORB    ZNF483  PRKAG2  KDM5B   ZNF12   CCNT1   NOC2L   CGA TNKS1BP1    NR2F1   RXRB    RMI1    RABGGTB ZNF705E MT-CO3  CCNA1   ZNF697  GLS WWTR1   ESRRA   BCL2L11 KRBOX4  PPP2CB  CCND1   ZNF112  ZNF740  ZNF10   NR2E1   ZNF486  SMARCD3 PSMB9   PIN1    PSMF1   ELOC    GTF2H5  NR2C2AP PSMC3   MYBL2   ZNF223  PSMA6   ZNF41   RABGGTA POLR2B  ZNF225  CHD3    ZNF75A  KAT6A   MED26   HNF4A   CNOT4   CENPJ   RUNX2   DEK ZNF23   TCEA1   MBD3    ZNF540  BARD1   ZNF595  NR5A1   ZNF343  TXN PRDX1   ZNF33A  WWOX    MED24   BRD2    TSC2    POLR2D  ZNF440  RAD1    GATA4   CTDP1   ZNF479  ZNF347  ZNF619  ZNF749  CSNK2B  ZNF211  CDK13   CDK2    PPM1A   ZNF256  FOXO3   ZNF433  SMURF2  ZNF37A  COX11   ZNF227  TFAP2D  ZNF33B  ZNF133  PSMD14  BRPF1   ESRRB   ZNF577  USP2    ITGAL   PCNA    UBE2I   CITED2  YWHAE   IGFBP3  ZNF224  ZNF772  BCL2L14 ZNF555  TAF1    BRCA1   NR3C2   NOP2    ZNF547  ZNF729  RBL2    TNRC6A  ZNF706  CASP6   PLAGL1  CSNK2A2 SKIL    HDAC1   RXRG    CDKN2B  PSME2   PSMB8   SMURF1  PSMA2   UBE2D3  PSMD13  AC010132.3  AC003002.1  CNOT11  ZFP1    PMS2    ATM ZNF385A ZNF304  ERCC3   ZNF519  TAF10   ZNF597  POLR2J  PSME1   SUPT4H1 THRB    TAF4    MNAT1   PARP1   ZNF160  ZNF230  PLK2    ZNF333  NR2E3   MAML3   ZNF684  BANP    CNOT7   BNIP3L  ZNF773  ZNF202  ZNF425  CDK9    TCF7L2  ZNF692  ZNF710  ZSCAN25 ZNF180  ZNF670  ZNF510  GATAD2A MT-CO1  ZNF552  COX14   RPS27A  BRPF3   NRBP1   MAPKAPK5    HDAC2   CDK1    ZNF568  ZNF221  GTF2F1  COX5B   BRIP1   AURKB   ZNF208  TFDP1   ZNF667  COX7A2L RGCC    RAD9A   BRD7    ZNF717  PSMD12  ZNF571  POLR2F  ZNF614  MYC UBA52   PTEN    MED6    SUPT16H PSMD7   NR1H3   PRDX2   PSME3   CDKN2A  PRKAA1  ZNF155  COX16   ATRIP   SMAD2   ZFP14   NR5A2   ZNF468  ZNF607  GATAD2B RBBP7   PRDX5   RRAGA   ZNF680  NUAK1   SMAD4   VEGFA   ZNF471  NCOR1   ZNF79   TCF7    RXRA    COX19   NPPA    GTF2H3  RNF34   ZNF613  ING2    UBB AGO4    CSNK2A1 MED10   CITED4  ZNF778  ZNF282  PPARA   CDK5    ZNF429  ZKSCAN1 PRKAB1  ELOA    ZNF138  TMEM219 ZNF70   ZNF431  RPA2    ZNF26   SCO2    CCNH    TRIM28  RARA    ZKSCAN8 RUNX1   GLS2    ZNF735  PPP2CA  ZNF543  RAD51D  ZNF582  APAF1   ZNF720  ZNF782  EXO1    LAMTOR4 NR1H4   KCTD15  ZFP28   CNOT2   CCNE2   PSMA7   TGS1    RPA1    ZNF19   NR3C1   PSMA3   ZNF337  TP53BP2 ZNF586  ZSCAN32 SURF1   MTOR    COX18   POLR2G  SESN3   CNOT6   GTF2H1  PSMC5   ZNF714  NR4A1   AGO1    ZNF716  CNOT6L  ZNF154  ZNF92   THRA    ZNF775  RAD50   AR  PSMD4   TBX5    BRD1    ZNF490  ZNF324B ZNF263  MAML2   ZNF212  PSMA4   E2F7    MED17   TAF4B   MED27   POU4F1  ZNF254  PSMB4   ZNF18   ZIM2    ZIK1    ZNF790  ZNF641  TGIF1   ELOA3D  ELOA3B  CHD4    CRADD   HELZ2   ZNF222  COX8A   AGO3    RBBP8   ZNF561  ELL ZNF302  MDC1    MEN1    RORC    HKR1    PDPK1   KAT2B   PMAIP1  ZNF589  ZNF585A MED7    PRELID1 E2F5    NOTCH3  ZNF544  ZNF257  SMYD2   ZNF248  NR1H2   TFDP2   PIP4K2C ZNF267  ELOB    TNFRSF10C   PRMT1   ELOA2   CCNT2   ZNF253  YY1 TMEM55B ZNF573  ZNF559  TP53I3  ZNF724  NEDD4L  ZFHX3   ZNF702P NRBF2   ZNF436  JAG1    ZNF443  ESRRG   NR2F6   ZNF761  JUNB    FANCC   MEAF6   LEF1    ZNF514  NLRC4   CCNA2   ESR2    ZNF34   RBL1    ZNF606  CCNB1   BBC3    AKT1    TNFRSF10B   POLR2E  VDR ITGA4   ZNF668  MED13   SMAD7   ZNF682  ZNF774  CDK12   PSMD9   PSMB2   ZNF688  EGFR    ZNF675  NR2C2   ZNF662  PIDD1   ZNF141  FOS ZNF777  PRKAA2  ZNF564  MED20   ZNF3    ZNF484  KRAS    MED25   ZNF99   SUPT5H  ZNF430  ZNF268  ZNF570  RFFL    NR6A1   DYRK2   ZNF135  CASP1   UBC BAX WRN PLK3    LAMTOR3 TAF7    ZNF214  PITX2   ATP1B4  RAD17   ZNF708  CYCS    NOTCH4  TAF3    ZNF705A COX20   POLR2A  PHF20   CDK5R1  TAF12   ZNF383  PSMD10  ZNF703  ZNF705D ZKSCAN4 ZNF611  ZNF419  CGB8    ZNF197  HDAC4   TFAP2A  CNOT8   POLR2L  TRIM33  COX7C   ZNF620  ZNF665  ZNF454  ZNF799  KMT5A   AC002310.5  PSMB7   POU4F2  TGIF2   TBL1XR1 RPTOR   TBP ZNF354C RARB    CREBBP  MLST8   ZNF77   ZNF566  RRAGD   LAMTOR2 TACO1   TP63    FANCI   CNOT3   ZNF626  PSMC2   COX6A1  CHEK2   CBFB    ZFP37   ZNF287  ZNF718  DAXX    RBBP4   CCNE1   NCOA1   TRIAP1  ZNF615  PRKAG1  PRDM7   NR1D1   GADD45A RAD9B   TAF13   ZNF730  ZNF610  E2F4    ZNF721  CDC25C  ZNF517  HSPD1   CDKN1B  MED16   CCNK    RHEB    NCOA6   ATR ZNF300  ZNF770  MT-CO2  CGB5    ZNF696  MAMLD1  ZNF750  NR4A3   ZNF658  CDKN1A  ZNF528  AURKA   YAP1    MAML1   ZNF195  TEAD4   ZNF689  NOTCH1  CNOT1   RBPJ    PERP    ZNF599  ZNF556  NR1I3   ZNF205  ZNF439  CNOT10  AIFM2   ZNF506  ZNF669  PRDM1   ZNF266  NR0B2   ZNF100  COX4I1  YWHAZ   TNRC6B  ZNF746  YWHAH   POLR2K  ZNF624  ZNF184  ZNF548  ESR1    PRELID3A    TCF7L1  ZFP69B  PSMC1   GPI TNRC6C  STEAP3  ZNF676  TSC1    MED14   EHMT2   YWHAQ   ZNF114  ING5    TP53INP1    CCNG1   TIGAR   ZNF530  GSR SETD9   ZNF804B ZNF747  ZNF354B ZNF678  PSMB3   YEATS4  PPP1R13L    ZNF273  MRE11   ZNF587  G6PD    ZNF585B PSMD5   NELFB   ZNF75D  NR1D2   ZNF101  ZNF699  ZNF473  TEAD1   ZNF660  ZNF767P PPP1R13B    ZNF398  ZNF442  ZNF565  ZNF563  SERPINE1    PSMD3   CCNC    SSRP1   ZNF350  COX7B   ZNF711  ZNF285  PPP2R5C ZNF286A ZNF704  ZNF500  ZNF461  FANCD2  PPARG   TNFRSF10D   PSMD6   ZNF860  KCTD1   ZNF416  RHNO1   CARM1   SNW1    ZNF562  NR1I2   ZNF394  SESN1   ZNF583  CHEK1   LRPPRC  ZNF264  CDK7    TPX2    ELOA3   NCOR2   PPARD   PRKAG3  BID ZNF549  ZNF785  RRAGB   KRBA1   TEAD2   MSH2    COX6C   ZNF840P HES1    ZNF71   PSMB5   TP53    ZNF334  MOV10   HIPK1   ZNF529  ZNF354A TFAP2B  ZNF485  MED4    HNF4G   PSMD11  ZNF726  AGO2    ZNF43   MAP2K6  PSMA1   TP73    TXNRD1  LAMTOR1 AC134772.2  BIRC5   POLR2H  COX5A   ERBB2   JMY ZNF124  TAF1L   TP53RK  MTA2    ZNF791  MED30   NPM1    ZNF605  PIP4K2B ZFP30   ZNF496  ZNF226  RFC2    NELFE   ZNF480  MED23   HIPK2   YWHAB   MLH1    SLC38A9 PSMC6   TAF2    ZKSCAN7 ZNF30   TTC5    PCBP4   GTF2H2  PPP2R1B ZFP69   TOP3A   TOPBP1  ZNF233  CDK8    USP9X   ZNF546  ZNF701  CHD9    ZNF324  ZKSCAN3 AKT2    ZNF215  ARID3A  PRKAB2  MED8    RMI2    ZNF793  ZNF732  ZNF74   ZNF738  MED31   SEM1    NELFA   ZNF560  ZNF627  ZNF25   ZFP90   ZNF551  TNFRSF10A   SUMO1   ZNF596  NR0B1   GPX2    ZNF311  APOE    RFC4    NCOA2   ZNF705G E2F8    USP7    GTF2F2  ZNF250  AKT3    NR2C1   MED12   PML RRAGC   ZNF713  PIP4K2A ZNF616  ZNF274  RORA    ZNF569  CNOT9   RNF111  TGFB1   ZNF2    MDM2    ATF2    SFN MDM4    ZNF432  PSMD2   ZFP2    FAS MIR26A2 PSMB10  POLR2C  E2F1    TAF9    ZNF621  TAF6    MIR26A1 CGB3    ZNF420  EHMT1   TGFA    PSMD8   RPA3    ZNF625  PGR SGK1    KAT2A   ZNF764  ZNF382  ZNF707  ZNF45   RFC3    TFAP2E  SESN2   NR4A2   ZNF320  PRR5    ZNF470  ZNF140  ZNF441  SKI UBE2D1  ZNF175  DDIT4   ZNF679  PSMA5   YWHAG   ZNF169  ZNF417  ZNF550</code></pre>
 </div>
@@ -1408,13 +1480,13 @@ depicting the additional information provided by directional impact.</p>
 <p>For a more diverse range of colors, ActivePathways supports any color
 palette from RColorBrewer. The color_palette parameter must be
 provided.</p>
-<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>, <span class="at">color_palette =</span> <span class="st">&quot;Pastel1&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>, <span class="at">color_palette =</span> <span class="st">&quot;Pastel1&quot;</span>)</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /></p>
 <p>Instead, to manually input the color of each dataset the
 custom_colors parameter must be specified as a vector. This vector
 should contain the same number of colors as columns in the scores
 matrix.</p>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>, <span class="at">custom_colors =</span> <span class="fu">c</span>(<span class="st">&quot;violet&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;orange&quot;</span>,<span class="st">&quot;red&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">ActivePathways</span>(scores, gmt_file, <span class="at">cytoscape_file_tag =</span> <span class="st">&quot;enrichmentMap__&quot;</span>, <span class="at">custom_colors =</span> <span class="fu">c</span>(<span class="st">&quot;violet&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;orange&quot;</span>,<span class="st">&quot;red&quot;</span>))</span></code></pre></div>
 <p><img src="data:image/png;base64,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" /></p>
 <p>To change the color of the <em>combined</em> contribution, a color
 must be provided to the color_integrated_only parameter.</p>
